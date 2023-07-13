@@ -45,6 +45,7 @@ The `--fix` option on the [command line](https://eslint.org/docs/user-guide/comm
 | Rule ID | Description |    |
 |:--------|:------------|:---|
 | [vue-kebab-class-naming/no-dynamic-class-names](./docs/rules/no-dynamic-class-names.md) | disallow dynamic class names usage | |
+| [vue-kebab-class-naming/no-undefined-class-names](./docs/rules/no-undefined-class-names.md) | disallow class names using in `<template>` that are not defined in `<style>` | :wrench: |
 
 ## Contributing
 

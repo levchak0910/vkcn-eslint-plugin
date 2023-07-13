@@ -6,6 +6,11 @@ const baseRules = [
     ruleName: "no-dynamic-class-names",
     ruleId: "vue-kebab-class-naming/no-dynamic-class-names",
   },
+  {
+    rule: require("../rules/no-undefined-class-names"),
+    ruleName: "no-undefined-class-names",
+    ruleId: "vue-kebab-class-naming/no-undefined-class-names",
+  },
 ];
 
 export const rules = baseRules.map((obj) => {
