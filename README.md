@@ -38,6 +38,33 @@ module.exports = {
 }
 ```
 
+### Recommended usage
+
+_Please note!_ Recommended set of rules includes several eslint plugins, which are out of this plugin's scope, so install them separately.
+
+```js
+module.exports = {
+  parser: "vue-eslint-parser",
+  plugins: [
+    'vue',
+    'vue-scoped-css',
+    'vue-kebab-class-naming',
+  ],
+  rules: {
+    "vue/no-useless-v-bind": "error",
+    "vue/prefer-separate-static-class": "error",
+
+    "vue-scoped-css/enforce-style-type": ["error", { allows: ["plain"] }],
+    "vue-scoped-css/no-unused-selector": ["error", { checkUnscoped: true }],
+    "vue-scoped-css/require-selector-used-inside": ["error", { checkUnscoped: true }],
+
+    'vue-kebab-class-naming/no-convention-violation': ["error", { enableFix: true }],
+    'vue-kebab-class-naming/no-dynamic-class-names': "error",
+    'vue-kebab-class-naming/no-undefined-class-names': "error",
+  }
+}
+```
+
 ## Available rules
 
 The `--fix` option on the [command line](https://eslint.org/docs/user-guide/command-line-interface#fixing-problems) automatically fixes problems reported by rules which have a wrench :wrench: below.
