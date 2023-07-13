@@ -79,7 +79,7 @@ export = {
         "disallow class names being used in `<template>` that are not defined in `<style>`",
       categories: [],
       default: "error",
-      url: "https://github.com/levchak0910/eslint-plugin-vue-kebab-class-naming/rules/no-undefined-class-names.html",
+      url: "https://github.com/levchak0910/eslint-plugin-vue-kebab-class-naming/blob/main/docs/rules/no-undefined-class-names.md",
     },
     fixable: null,
     messages: {

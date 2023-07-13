@@ -29,7 +29,7 @@ export = {
       description: "enforce convention.",
       categories: [""],
       default: "error",
-      url: "https://github.com/levchak0910/eslint-plugin-vue-kebab-class-naming/rules/no-convention-violation.html",
+      url: "https://github.com/levchak0910/eslint-plugin-vue-kebab-class-naming/blob/main/docs/rules/no-convention-violation.md",
     },
     fixable: "code",
     messages: {
