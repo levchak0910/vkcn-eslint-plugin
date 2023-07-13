@@ -1,69 +1,48 @@
 {
-  "name": "eslint-plugin-vue-scoped-css",
-  "version": "2.5.0",
-  "description": "ESLint plugin for Scoped CSS in Vue.js",
+  "name": "eslint-plugin-vue-kebab-class-naming",
+  "version": "0.1.0",
+  "description": "ESLint plugin for ensuring a kebab-ish like class naming convention in Vue files",
   "main": "dist/index.js",
   "scripts": {
-    "prebuild": "npm run -s clean",
-    "build": "tsc --project ./tsconfig.build.json",
-    "clean": "rimraf .nyc_output dist coverage",
+    "build": "rimraf dist && tsc --project ./tsconfig.build.json",
     "lint": "eslint . --ext .js,.vue,.ts,.json",
-    "eslint-fix": "eslint . --ext .js,.vue,.ts,.json --fix",
+    "fix": "npm run lint -- --fix",
     "pretest": "npm run build",
     "test:base": "mocha --require ts-node/register \"tests/**/*.ts\" --reporter dot --timeout 60000",
-    "test": "npm run test:nyc",
-    "test:nyc": "nyc --reporter=lcov npm run test:base",
+    "test": "npm run test:base",
     "test:debug": "mocha --require ts-node/register/transpile-only \"tests/**/*.ts\" --reporter dot",
+    "t": "mocha --require ts-node/register/transpile-only --reporter dot",
     "test:watch": "npm run test:base -- --watch",
-    "update": "ts-node ./tools/update.ts && npm run eslint-fix && npm run test:nyc",
-    "new": "ts-node ./tools/new-rule.ts",
-    "docs:watch": "npm run vuepress -- dev --debug docs",
-    "docs:build": "npm run build && npm run vuepress -- build docs --no-cache",
-    "vuepress": "node --openssl-legacy-provider ./node_modules/vuepress/cli.js",
-    "preversion": "npm test && npm run update && git add .",
-    "version": "npm run lint -- --fix && git add .",
-    "version:ci": "npm run update && changeset version",
-    "prerelease": "npm run build",
-    "release": "changeset publish",
-    "updatefixture": "cross-env UPDATE_FIXTURE=\"true\" npm run test:base"
+    "update": "ts-node ./tools/update-rules.ts && eslint ./lib/utils/rules.ts --fix",
+    "new": "ts-node ./tools/new-rule.ts"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/future-architect/eslint-plugin-vue-scoped-css.git"
+    "url": "git+https://github.com/levchak0910/eslint-plugin-vue-kebab-class-naming.git"
   },
-  "author": "Yosuke Ota",
-  "funding": "https://github.com/sponsors/ota-meshi",
+  "author": "Levcsák Sándor",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/future-architect/eslint-plugin-vue-scoped-css/issues"
-  },
-  "homepage": "https://future-architect.github.io/eslint-plugin-vue-scoped-css/",
   "keywords": [
     "eslint",
-    "eslintplugin",
     "eslint-plugin",
     "vue",
-    "style",
-    "scoped",
-    "css"
+    "classes",
+    "class-names",
+    "kebab-case"
   ],
   "files": [
     "dist"
   ],
   "devDependencies": {
-    "@changesets/cli": "^2.24.2",
     "@ota-meshi/eslint-plugin": "^0.13.0",
-    "@svitejs/changesets-changelog-github-compact": "^1.1.0",
-    "@types/eslint": "^8.0.0",
+    "@types/eslint": "^8.40.1",
     "@types/eslint-visitor-keys": "^1.0.0",
     "@types/estree": "^1.0.0",
-    "@types/lodash": "^4.14.158",
+    "@types/lodash": "^4.14.195",
     "@types/mocha": "^10.0.0",
-    "@types/semver": "^7.3.1",
-    "@typescript-eslint/eslint-plugin": "^5.49.0",
-    "@typescript-eslint/parser": "^5.49.0",
-    "cross-env": "^7.0.2",
-    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^8.42.0",
     "eslint-config-prettier": "^8.0.0",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-eslint-plugin": "^5.0.0",
@@ -72,28 +51,19 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-regexp": "^1.0.0",
-    "eslint-plugin-vue": "^9.0.0",
-    "eslint-plugin-vue-scoped-css": "^2.0.0",
     "eslint-plugin-yml": "^1.0.0",
     "mocha": "^10.0.0",
-    "nyc": "^15.1.0",
-    "pack": "^2.2.0",
     "prettier": "^3.0.0",
-    "raw-loader": "^4.0.1",
-    "rimraf": "^3.0.2",
-    "semver": "^7.3.2",
-    "stylelint": "^15.0.0",
-    "stylelint-config-recommended-vue": "^1.1.0",
-    "stylelint-config-standard": "^34.0.0",
-    "stylelint-stylus": "^0.18.0",
+    "rimraf": "^5.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.0",
-    "vue-eslint-editor": "^1.1.0",
-    "vue-eslint-parser": "^9.0.0",
-    "vuepress": "^1.8.2"
+    "vue-eslint-parser": "^9.0.0"
   },
   "dependencies": {
+    "@eslint-community/eslint-utils": "^4.4.0",
+    "case-anything": "^2.1.13",
     "eslint-utils": "^3.0.0",
+    "fastest-levenshtein": "^1.0.16",
     "lodash": "^4.17.21",
     "postcss": "^8.4.6",
     "postcss-safe-parser": "^6.0.0",
@@ -105,26 +75,7 @@
     "eslint": ">=5.0.0",
     "vue-eslint-parser": ">=7.1.0"
   },
-  "nyc": {
-    "include": [
-      "lib/*.ts",
-      "lib/**/*.ts"
-    ],
-    "extension": [
-      ".ts"
-    ],
-    "require": [
-      "ts-node/register"
-    ],
-    "exclude": [
-      "**/*.spec.js",
-      "tests/**/*.js"
-    ]
-  },
   "engines": {
-    "node": "^12.22 || ^14.17 || >=16"
-  },
-  "publishConfig": {
-    "access": "public"
+    "node": ">=16"
   }
 }

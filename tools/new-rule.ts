@@ -1,6 +1,7 @@
 import path from "path";
 import fs from "fs";
 import cp from "child_process";
+
 const logger = console;
 
 // main
@@ -36,51 +37,34 @@ export = {
         docs: {
             description: "",
             categories: [''],
-            default: "warn",
+            default: "error",
             url: "",
         },
         fixable: null,
         schema: [],
         messages: {
         },
-        type: "suggestion", // "problem",
+        type: "problem", // "suggestion",
     },
     create(context: RuleContext): RuleListener {
-        const styles = getStyleContexts(context)
-            .filter(isValidStyleContext)
-            .filter((style) => style.scoped)
-        if (!styles.length) {
-            return {}
-        }
+        const styles = getStyleContexts(context).filter(isValidStyleContext)
+        if (styles.length === 0) return {}
+
         const reporter = getCommentDirectivesReporter(context)
 
-
-        /**
-         * Reports the given node
-         * @param {ASTNode} node node to report
-         */
         function report(node: VCSSSelectorNode) {
             reporter.report({
                 node,
                 loc: node.loc,
                 messageId: "???",
-                data: {}
+                data: {},
             })
         }
 
 
         return {
-            "Program:exit"() {
-                // const queryContext = createQueryContext(
-                //     context,
-                //     context.options[0] || {},
-                // )
-                //
-                // for (const style of styles) {
-                //     for (const scopedSelector of getScopedSelectors(style)) {
-                //         verifySelector(queryContext, scopedSelector)
-                //     }
-                // }
+            "<token>"(node) {
+                return report(node)
             },
         }
     },
@@ -104,10 +88,10 @@ tester.run("${ruleId}", rule as any, {
     valid: [
         \`
         <template>
-            <div class="item">sample</div>
+            <div class="foo" />
         </template>
-        <style scoped>
-        .item {}
+        <style>
+            .foo {}
         </style>
         \`
     ],
@@ -115,15 +99,15 @@ tester.run("${ruleId}", rule as any, {
         {
             code: \`
             <template>
-                <div class="item">sample</div>
+                <div class="foo" />
             </template>
-            <style scoped>
-            .item {}
+            <style>
+                .bar {}
             </style>
             \`,
             errors: [
                 {
-                    messageId: "unused",
+                    messageId: "???",
                     data: {},
                     line: 1,
                     column: 1,
@@ -138,36 +122,19 @@ tester.run("${ruleId}", rule as any, {
   );
   fs.writeFileSync(
     docFile,
-    `#  (vue-scoped-css/${ruleId})
+    `# vue-kebab-class-naming/${ruleId}
 
-> foo
+> <short description>
 
 ## :book: Rule Details
 
-This rule reports ??? as errors.
-
-<eslint-code-block :rules="{'vue-scoped-css/${ruleId}': ['error']}">
-
-\`\`\`vue
-<template>
-  <div class="item"></div>
-</template>
-<style scoped>
-/* ✗ BAD */
-.item {}
-
-/* ✓ GOOD */
-.item {}
-</style>
-\`\`\`
-
-</eslint-code-block>
+<full description>
 
 ## :wrench: Options
 
 \`\`\`json
 {
-  "vue-scoped-css/${ruleId}": ["error", {
+  "vue-kebab-class-naming/${ruleId}": ["error", {
    
   }]
 }
@@ -177,11 +144,18 @@ This rule reports ??? as errors.
 
 ## :books: Further reading
 
-- None
+- Fill or delete section
 
 `,
   );
-  cp.execSync(`code "${ruleFile}"`);
-  cp.execSync(`code "${testFile}"`);
-  cp.execSync(`code "${docFile}"`);
+
+  try {
+    const files = [ruleFile, testFile].map((p) =>
+      path.relative(path.resolve("."), p),
+    );
+
+    cp.execSync(`npx eslint --fix ${files.join(" ")}`);
+  } catch {
+    //
+  }
 })(process.argv[2]);

@@ -113,7 +113,6 @@ describe("CSS Nodes Test.", () => {
   }
 });
 
-// eslint-disable-next-line complexity -- test
 function checkCSSNodeLocations(
   code: string,
   node: VCSSNode | VCSSSelectorNode,

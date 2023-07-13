@@ -116,7 +116,6 @@ function buildElementText(e: AST.VElement, context: RuleContext): string {
   return text;
 }
 
-// eslint-disable-next-line complexity -- test
 function getAttrText(
   element: AST.VElement,
   name: string,

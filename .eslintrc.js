@@ -1,7 +1,5 @@
 "use strict";
 
-// const version = require("./package.json").version
-
 module.exports = {
   parserOptions: {
     sourceType: "script",
@@ -17,12 +15,20 @@ module.exports = {
     "plugin:@ota-meshi/+prettier",
   ],
   rules: {
-    "require-jsdoc": "error",
+    "require-jsdoc": "off",
     "no-warning-comments": "warn",
     "no-lonely-if": "off",
     "@typescript-eslint/ban-ts-ignore": "off",
     "eslint-comments/no-unused-disable": "error",
     "@typescript-eslint/no-non-null-assertion": "off",
+    complexity: "off",
+    "prettier/prettier": [
+      "error",
+      {
+        singleQuote: false,
+        trailingComma: "all",
+      },
+    ],
   },
   overrides: [
     {
@@ -46,7 +52,7 @@ module.exports = {
           "warn",
           {
             pattern:
-              "https://future-architect.github.io/eslint-plugin-vue-scoped-css/rules/{{name}}.html",
+              "https://github.com/levchak0910/eslint-plugin-vue-kebab-class-naming/rules/{{name}}.html",
           },
         ],
         "eslint-plugin/require-meta-has-suggestions": "off", // false positive
@@ -83,35 +89,7 @@ module.exports = {
     {
       files: ["scripts/*.js", "tests/**/*.js", "scripts/*.ts", "tests/**/*.ts"],
       rules: {
-        "require-jsdoc": "off",
         "no-console": "off",
-      },
-    },
-    {
-      files: ["*.vue"],
-      parserOptions: {
-        sourceType: "module",
-      },
-      extends: ["plugin:vue-scoped-css/recommended"],
-      globals: {
-        require: true,
-      },
-    },
-    {
-      files: ["docs/.vuepress/**"],
-      parserOptions: {
-        sourceType: "module",
-        ecmaVersion: 2020,
-      },
-      extends: ["plugin:@ota-meshi/+vue2", "plugin:@ota-meshi/+prettier"],
-      globals: {
-        window: true,
-      },
-      rules: {
-        "require-jsdoc": "off",
-        "node/no-unsupported-features/es-syntax": "off",
-        "node/no-missing-import": "off",
-        "node/no-missing-require": "off",
       },
     },
   ],

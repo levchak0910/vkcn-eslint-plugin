@@ -71,6 +71,21 @@ export type SourceLocation = AST.LocationRange;
 export type Range = [number, number];
 interface ParserServices {
   /**
+   * Define handlers to traverse the template body.
+   * @param templateBodyVisitor The template body handlers.
+   * @param scriptVisitor The script handlers. This is optional.
+   * @link https://github.com/vuejs/vue-eslint-parser/blob/fafbc7d38d38b31f5db529e2633af6736f30cce9/src/parser-services.ts#L53
+   */
+  defineTemplateBodyVisitor(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- inherit from vue-eslint-parser
+    templateBodyVisitor: { [key: string]: (...args: any) => void },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- inherit from vue-eslint-parser
+    scriptVisitor?: { [key: string]: (...args: any) => void },
+    options?: {
+      templateBodyTriggerSelector: "Program" | "Program:exit";
+    },
+  ): RuleListener;
+  /**
    * Get the token store of the template body.
    * @returns The token store of template body.
    */

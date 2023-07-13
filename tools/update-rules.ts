@@ -2,7 +2,7 @@ import path from "path";
 import fs from "fs";
 import os from "os";
 // import eslint from "eslint"
-import { rules } from "./lib/load-rules";
+import { rules } from "./load-rules";
 const isWin = os.platform().startsWith("win");
 
 let content = `
@@ -12,9 +12,9 @@ const baseRules = [
     ${rules
       .map(
         (rule) => `{
-    rule: require("../rules/${rule.meta.docs.ruleName}"),
-    ruleName: "${rule.meta.docs.ruleName}",
-    ruleId: "${rule.meta.docs.ruleId}",
+        rule: require("../rules/${rule.meta.docs.ruleName}"),
+        ruleName: "${rule.meta.docs.ruleName}",
+        ruleId: "${rule.meta.docs.ruleId}",
     },
     `,
       )
@@ -27,25 +27,6 @@ export const rules = baseRules.map(obj => {
     rule.meta.docs.ruleId = obj.ruleId
     return rule as Rule
 })
-
-/**
- * Collect the rules
- * @param {string} category category
- * @returns {Array} rules
- */
-export function collectRules(
-    category?: "recommended" | "vue3-recommended",
-): { [key: string]: string } {
-    return rules.reduce((obj, rule) => {
-        if (
-            (!category || rule.meta.docs.categories.includes(category)) &&
-            !rule.meta.deprecated
-        ) {
-            obj[rule.meta.docs.ruleId || ""] = rule.meta.docs.default || "error"
-        }
-        return obj
-    }, {} as { [key: string]: string })
-}
 `;
 
 const filePath = path.resolve(__dirname, "../lib/utils/rules.ts");
