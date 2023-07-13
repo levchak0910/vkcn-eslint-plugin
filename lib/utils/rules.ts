@@ -1,6 +1,12 @@
 import type { Rule } from "../types";
 
-const baseRules = [];
+const baseRules = [
+  {
+    rule: require("../rules/no-dynamic-class-names"),
+    ruleName: "no-dynamic-class-names",
+    ruleId: "vue-kebab-class-naming/no-dynamic-class-names",
+  },
+];
 
 export const rules = baseRules.map((obj) => {
   const rule = obj.rule;
