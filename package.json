@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-vue-kebab-class-naming",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "ESLint plugin for ensuring a kebab-ish like class naming convention in Vue files",
   "main": "dist/index.js",
   "scripts": {
@@ -14,7 +14,8 @@
     "t": "mocha --require ts-node/register/transpile-only --reporter dot",
     "test:watch": "npm run test:base -- --watch",
     "update": "ts-node ./tools/update-rules.ts && eslint ./lib/utils/rules.ts --fix",
-    "new": "ts-node ./tools/new-rule.ts"
+    "new": "ts-node ./tools/new-rule.ts",
+    "publish": "npm run build && npm publish"
   },
   "repository": {
     "type": "git",
