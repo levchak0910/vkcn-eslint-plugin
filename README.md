@@ -2,7 +2,7 @@
 
 [eslint-plugin-vue-kebab-class-naming](https://www.npmjs.com/package/eslint-plugin-vue-kebab-class-naming) is an ESLint plugin for ensuring a kebab-ish like class naming convention.
 
-This convention was invited and relates only to this plugin. The convention was created to solve styles encapsulation via class naming.
+This convention was invited and relates only to this plugin. The convention was created to solve styles encapsulation via class naming. The description of the convention can be found in [rule documentation](./docs/rules/no-convention-violation.md).
 
 ## Features
 
@@ -46,6 +46,7 @@ The `--fix` option on the [command line](https://eslint.org/docs/user-guide/comm
 |:--------|:------------|:---|
 | [vue-kebab-class-naming/no-dynamic-class-names](./docs/rules/no-dynamic-class-names.md) | disallow dynamic class names usage | |
 | [vue-kebab-class-naming/no-undefined-class-names](./docs/rules/no-undefined-class-names.md) | disallow class names using in `<template>` that are not defined in `<style>` | :wrench: |
+| [vue-kebab-class-naming/no-convention-violation](./docs/rules/no-convention-violation.md) | enforce css/scss code style | :wrench: |
 
 ## Contributing
 

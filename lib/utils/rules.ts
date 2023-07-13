@@ -11,6 +11,11 @@ const baseRules = [
     ruleName: "no-undefined-class-names",
     ruleId: "vue-kebab-class-naming/no-undefined-class-names",
   },
+  {
+    rule: require("../rules/no-convention-violation"),
+    ruleName: "no-convention-violation",
+    ruleId: "vue-kebab-class-naming/no-convention-violation",
+  },
 ];
 
 export const rules = baseRules.map((obj) => {
