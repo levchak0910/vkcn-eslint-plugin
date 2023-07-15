@@ -13,8 +13,7 @@ import {
   getStyleContexts,
   getCommentDirectivesReporter,
 } from "../styles/context";
-import { hasTemplateBlock, isDefined } from "../utils/utils";
-import { toRegExp } from "../utils/regexp";
+import { hasTemplateBlock, isDefined, isSatisfyList } from "../utils/utils";
 import { getClassAttrNameRegexp } from "../utils/class-attr";
 
 function getSelectors(style: ValidStyleContext): VCSSSelectorNode[] {
@@ -92,13 +91,7 @@ export = {
       {
         type: "object",
         properties: {
-          ignoreClassNameList: {
-            type: "array",
-            items: { type: "string" },
-            uniqueItems: true,
-            additionalItems: true,
-          },
-          ignoreClassNameRegexps: {
+          ignoreClassNames: {
             type: "array",
             items: { type: "string" },
             uniqueItems: true,
@@ -120,6 +113,9 @@ export = {
     const reporter = getCommentDirectivesReporter(context);
 
     const classAttrRegexp = getClassAttrNameRegexp(context);
+
+    const ignoreClassNames =
+      (context.options[0]?.ignoreClassNames as string[]) ?? [];
 
     const classSelectors = styles
       .map(getSelectors)
@@ -238,12 +234,6 @@ export = {
       });
     }
 
-    const ignoreClassNameList =
-      (context.options[0]?.ignoreClassNameList as string[]) ?? [];
-    const ignoreClassNameRegexps = (
-      (context.options[0]?.ignoreClassNameRegexps as string[]) ?? []
-    ).map((regExpString) => toRegExp(regExpString));
-
     function handleClass(
       classListString: string,
       report: (notFoundClassName: string) => void,
@@ -255,8 +245,7 @@ export = {
         .filter((c) => c.length > 0);
 
       classes.forEach((className) => {
-        if (ignoreClassNameList.includes(className)) return;
-        if (ignoreClassNameRegexps.some((r) => r.test(className))) return;
+        if (isSatisfyList(ignoreClassNames, className)) return;
 
         const foundSelector = classSelectors.find((s) => s.value === className);
 

@@ -31,16 +31,14 @@ _Tip_: when class is defined in `<style>` but mistyped in `<template>` - use esl
 ```json
 {
   "vue-kebab-class-naming/no-undefined-class-names": ["error", {
-    "ignoreClassNameList": [],
-    "ignoreClassNameRegexps": [],
+    "ignoreClassNames": [],
   }]
 }
 ```
 
-- `ignoreClassNameList` ... Array of class names (as a string) that are considered to be ignored. Default is `[]`.
-- `ignoreClassNameRegexps` ... Array of regular expressions (as a string) that will be checked against the class names that are considered to be ignored. Default is `[]`.
+- `ignoreClassNames` ... Array of class names as a string or a regular expression (as a string) that are considered to be ignored. Default is `[]`.
 
-### `"ignoreClassNameList": ["class-c"]`
+### `"ignoreClassNames": ["class-c", "/^tw-/"]`
 
 ```vue
 <template>
@@ -50,22 +48,7 @@ _Tip_: when class is defined in `<style>` but mistyped in `<template>` - use esl
   <!-- ✓ GOOD -->
   <div class="class-b"></div>
   <div class="class-c"></div>
-</template>
-
-<style>
-.class-b {}
-</style>
-```
-
-### `"ignoreClassNameRegexps": ["/^tw-/"]`
-
-```vue
-<template>
-  <!-- ✗ BAD -->
-  <div class="class-a"></div>
-  <!-- ✓ GOOD -->
-  <div class="class-b"></div>
-  <div class="tw-text-center tw-bg-white"></div>
+  <div class="tw-text-red tw-bg-green"></div>
 </template>
 
 <style>

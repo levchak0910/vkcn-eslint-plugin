@@ -79,7 +79,7 @@ tester.run("no-undefined-class-names", rule as any, {
           .foo {}
         </style>
       `,
-      options: [{ ignoreClassNameList: ["bar"] }],
+      options: [{ ignoreClassNames: ["bar"] }],
     },
     {
       code: /* html */ `
@@ -90,7 +90,7 @@ tester.run("no-undefined-class-names", rule as any, {
           .foo {}
         </style>
       `,
-      options: [{ ignoreClassNameRegexps: ["/^foo/"] }],
+      options: [{ ignoreClassNames: ["/^foo/"] }],
     },
   ],
   invalid: [
@@ -505,7 +505,7 @@ tester.run("no-undefined-class-names", rule as any, {
           .foo {}
         </style>
       `,
-      options: [{ ignoreClassNameList: ["bar"] }],
+      options: [{ ignoreClassNames: ["bar"] }],
       errors: [
         {
           messageId: "undefined",
@@ -526,7 +526,7 @@ tester.run("no-undefined-class-names", rule as any, {
           .foo {}
         </style>
       `,
-      options: [{ ignoreClassNameRegexps: ["/^foo/"] }],
+      options: [{ ignoreClassNames: ["/^foo/"] }],
       errors: [
         {
           messageId: "undefined",
