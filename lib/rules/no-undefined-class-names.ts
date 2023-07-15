@@ -1,20 +1,21 @@
+import type { VAttribute } from "vue-eslint-parser/ast";
+import type { Literal, Property, TemplateLiteral } from "estree";
+import type { SourceLocation, Position } from "estree";
+import { isObject, isString } from "lodash";
+import { distance } from "fastest-levenshtein";
+
 import { getResolvedSelectors } from "../styles/selectors";
 import type { VCSSSelectorNode } from "../styles/ast";
 import { isClassSelector } from "../styles/utils/selectors";
 import type { RuleContext, RuleListener, RuleFixer } from "../types";
-import type { ValidStyleContext } from "../styles/context";
+import { type ValidStyleContext, isValidStyleContext } from "../styles/context";
 import {
   getStyleContexts,
   getCommentDirectivesReporter,
 } from "../styles/context";
 import { hasTemplateBlock, isDefined } from "../utils/utils";
 import { toRegExp } from "../utils/regexp";
-import { isValidStyleContext } from "../styles/context/style";
-import type { VAttribute } from "vue-eslint-parser/ast";
-import type { Literal, Property, TemplateLiteral } from "estree";
-import type { SourceLocation, Position } from "estree";
-import { isObject, isString } from "lodash";
-import { distance } from "fastest-levenshtein";
+import { getClassAttrNameRegexp } from "../utils/class-attr";
 
 function getSelectors(style: ValidStyleContext): VCSSSelectorNode[] {
   const resolvedSelectors = getResolvedSelectors(style);
@@ -91,15 +92,6 @@ export = {
       {
         type: "object",
         properties: {
-          classAttrNameList: {
-            type: "array",
-            items: { type: "string" },
-            uniqueItems: true,
-            additionalItems: true,
-          },
-          classAttrNameRegexp: {
-            type: "string",
-          },
           ignoreClassNameList: {
             type: "array",
             items: { type: "string" },
@@ -126,6 +118,8 @@ export = {
     const styles = getStyleContexts(context).filter(isValidStyleContext);
     const source = context.getSourceCode();
     const reporter = getCommentDirectivesReporter(context);
+
+    const classAttrRegexp = getClassAttrNameRegexp(context);
 
     const classSelectors = styles
       .map(getSelectors)
@@ -271,13 +265,6 @@ export = {
         }
       });
     }
-
-    const classAttrNames = [...(context.options[0]?.classAttrNameList || [])];
-    if (!classAttrNames.includes("class")) classAttrNames.push("class");
-
-    const classAttrNamesRegexp = `/^(${classAttrNames.join("|")})$/`;
-    const classAttrRegexp =
-      context.options[0]?.classAttrNameRegexp ?? classAttrNamesRegexp;
 
     return context.parserServices.defineTemplateBodyVisitor({
       [`VAttribute[key.name=${classAttrRegexp}]`](attr: VAttribute) {

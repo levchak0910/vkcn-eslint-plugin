@@ -10,42 +10,8 @@ import type {
 } from "eslint-plugin-vue/util-types/ast";
 
 import * as utils from "../utils/vue";
-import * as regexpUtils from "../utils/regexp";
+import { getClassAttrNameRegexp } from "../utils/class-attr";
 import type { RuleContext, RuleListener } from "../types";
-
-function getName(attribute: VAttribute | VDirective): string | null {
-  if (!attribute.directive) {
-    return attribute.key.name;
-  }
-  if (attribute.key.name.name === "bind") {
-    return (
-      (attribute.key.argument &&
-        attribute.key.argument.type === "VIdentifier" &&
-        attribute.key.argument.name) ||
-      null
-    );
-  }
-  return null;
-}
-
-function isSatisfyList(list: string[], item: string): boolean {
-  let itemSatisfies = list.includes(item);
-
-  if (itemSatisfies) return true;
-
-  const regexpItems = list
-    .filter(regexpUtils.isRegExp)
-    .map((reg) => regexpUtils.toRegExp(reg));
-
-  for (const regexp of regexpItems) {
-    if (regexp.test(item)) {
-      itemSatisfies = true;
-      break;
-    }
-  }
-
-  return itemSatisfies;
-}
 
 function withProps(
   context: RuleContext,
@@ -91,12 +57,6 @@ export = {
       {
         type: "object",
         properties: {
-          classAttrNames: {
-            type: "array",
-            items: { type: "string" },
-            uniqueItems: true,
-            additionalItems: true,
-          },
           allowConditional: {
             type: "boolean",
           },
@@ -112,10 +72,8 @@ export = {
   create(context: RuleContext): RuleListener {
     if (!context.parserServices.defineTemplateBodyVisitor) return {};
 
-    const names = [...(context.options[0]?.classAttrNames || [])];
+    const classAttrRegexp = getClassAttrNameRegexp(context);
     const allowConditional = context.options[0]?.allowConditional || false;
-
-    if (!names.includes("class")) names.push("class");
 
     function report(node: AST.HasLocation) {
       context.report({
@@ -271,13 +229,10 @@ export = {
 
     return withProps(context, (props) =>
       context.parserServices.defineTemplateBodyVisitor({
-        VAttribute(node: VAttribute) {
-          const name = getName(node);
-
-          if (name === null || !isSatisfyList(names, name)) {
-            return;
-          }
-
+        [`VAttribute[key.name=${classAttrRegexp}]`](node: VAttribute) {
+          reportDynamic(node, props);
+        },
+        [`VAttribute[key.argument.name=${classAttrRegexp}]`](node: VAttribute) {
           reportDynamic(node, props);
         },
       }),

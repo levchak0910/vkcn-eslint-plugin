@@ -32,11 +32,16 @@ Example **.eslintrc.js**:
 ```js
 module.exports = {
   plugins: ['vue-kebab-class-naming'],
+  settings: { "vkcn/class-attr-name": /custom-reg-exp/ }, // optional
   rules: {
     'vue-kebab-class-naming/<rule-name>': 'error'
   }
 }
 ```
+
+By using `settings: { "vkcn/class-attr-name": /custom-reg-exp/ }` it is possible to run rules throughout any attribute/directive which matches regexp. By default only `class` is checked.
+
+_Please note!_ When using a custom regexp - `class` **must be included** into it
 
 ### Recommended usage
 
@@ -77,11 +82,13 @@ Since Eslint works only with one file and can not lint the whole project - somet
 
 The `--fix` option on the [command line](https://eslint.org/docs/user-guide/command-line-interface#fixing-problems) automatically fixes problems reported by rules which have a wrench :wrench: below.
 
+Rules which have suggestions - marked with :bulb:
+
 | Rule ID | Description |    |
 |:--------|:------------|:---|
 | [vue-kebab-class-naming/no-dynamic-class-names](./docs/rules/no-dynamic-class-names.md) | disallow dynamic class names usage | |
-| [vue-kebab-class-naming/no-undefined-class-names](./docs/rules/no-undefined-class-names.md) | disallow class names using in `<template>` that are not defined in `<style>` | :wrench: |
-| [vue-kebab-class-naming/no-convention-violation](./docs/rules/no-convention-violation.md) | enforce css/scss code style | :wrench: |
+| [vue-kebab-class-naming/no-undefined-class-names](./docs/rules/no-undefined-class-names.md) | disallow class names using in `<template>` that are not defined in `<style>` | :bulb: |
+| [vue-kebab-class-naming/no-convention-violation](./docs/rules/no-convention-violation.md) | enforce css/scss code style | :wrench: :bulb: |
 
 ## Contributing
 

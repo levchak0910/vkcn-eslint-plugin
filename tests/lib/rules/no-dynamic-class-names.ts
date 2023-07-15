@@ -7,12 +7,12 @@ const tester = new RuleTester({
     ecmaVersion: 2019,
     sourceType: "module",
   },
+  settings: { "vkcn/class-attr-name": /(.+-)?class$/ },
 });
 
 type RuleOptions = {
   allowConditional: boolean;
   allowProps: boolean;
-  classAttrNames: string[];
 };
 
 type Options = {
@@ -28,7 +28,6 @@ function createCorrectTemplate(options: string | Partial<Options>) {
   const ruleOptions = {
     allowConditional: false,
     allowProps: false,
-    classAttrNames: [],
   };
 
   const normalizedOptions: Options =
@@ -82,7 +81,7 @@ tester.run("no-dynamic-class-names", rule as any, {
     createCorrectTemplate("$props.class"),
     createCorrectTemplate("$attrs.class"),
     createCorrectTemplate({
-      classExpression: "$props.someProp",
+      classExpression: "[$props.someProp, someProp]",
       props: ["someProp"],
       options: { allowProps: true },
     }),
@@ -98,12 +97,6 @@ tester.run("no-dynamic-class-names", rule as any, {
     createCorrectTemplate({
       classAttrName: "some-class",
       classExpression: "'some'",
-      options: { classAttrNames: ["some-class"] },
-    }),
-    createCorrectTemplate({
-      classAttrName: "some-class",
-      classExpression: "'some'",
-      options: { classAttrNames: ["/.+-class$/"] },
     }),
   ],
   invalid: [
@@ -136,12 +129,6 @@ tester.run("no-dynamic-class-names", rule as any, {
     createErrorTemplate({
       classAttrName: "some-class",
       classExpression: "some",
-      options: { classAttrNames: ["some-class"] },
-    }),
-    createErrorTemplate({
-      classAttrName: "some-class",
-      classExpression: "some",
-      options: { classAttrNames: ["/.+-class$/"] },
     }),
   ],
 });

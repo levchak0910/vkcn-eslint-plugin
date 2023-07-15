@@ -18,8 +18,32 @@ List of allowed class usage in bind directive:
 - usage as `$attrs.class` or `$props.class` (=_*1_)
 
 Exemptions (*):
+
 _*2_ = accessing dynamic class name value is allowed via props with option: `allowProps`.
+
 _*3_ = using conditionals is allowed via props with option: `allowConditionals`.
+
+### :eyes: Examples
+
+```vue
+<template>
+  <!-- GOOD -->
+  <div class="class-name"></div>
+  <div :class="['class-name']"></div>
+  <div :class="{'class-name': condition}"></div>
+  <div :class="$attrs.class"></div>
+  <div :class="$props.class"></div>
+  <!-- BAD -->
+  <div :class="someClass"></div>
+  <div :class="condition ? someClass : 'class-name'"></div>
+  <div :class="{[someClass]: condition}"></div>
+  <div :class="`class-name`"></div>
+</template>
+
+<script setup>
+const someClass = "class-name"
+</script>
+```
 
 ## :wrench: Options
 
@@ -28,11 +52,42 @@ _*3_ = using conditionals is allowed via props with option: `allowConditionals`.
   "vue-kebab-class-naming/no-dynamic-class-names": ["error", {
     "allowConditional": false,
     "allowProps": false,
-    "classAttrNames": [],
   }]
 }
 ```
 
 - `allowConditional` ... Allow using conditionals, then truthy and falsy branches will be checked. Default is `false`.
 - `allowProps` ... Allow using props as class name. Default is `false`.
-- `classAttrNames` ... List of all additional property names where to check dynamic class names usage. Could contain exact property name as string or regexp. Default is `[]`.
+
+### allowConditional = `true`
+
+```vue
+<template>
+  <!-- GOOD -->
+  <div :class="condition ? 'class-name1' : 'class-name2'"></div>
+  <!-- BAD -->
+  <div :class="condition ? someClass : 'class-name'"></div>
+</template>
+
+<script setup>
+const someClass = "class-name"
+</script>
+```
+
+### allowProps = `true`
+
+```vue
+<template>
+  <!-- GOOD -->
+  <div :class="propClass"></div>
+  <!-- BAD -->
+  <div :class="someClass"></div>
+</template>
+
+<script setup>
+defineProps({
+  propClass: String
+})
+const someClass = "class-name"
+</script>
+```

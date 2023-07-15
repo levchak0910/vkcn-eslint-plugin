@@ -88,7 +88,7 @@ tester.run("${ruleId}", rule as any, {
     valid: [
         \`
         <template>
-            <div class="foo" />
+            <div class="foo"></div>
         </template>
         <style>
             .foo {}
@@ -99,7 +99,7 @@ tester.run("${ruleId}", rule as any, {
         {
             code: \`
             <template>
-                <div class="foo" />
+                <div class="foo"></div>
             </template>
             <style>
                 .bar {}

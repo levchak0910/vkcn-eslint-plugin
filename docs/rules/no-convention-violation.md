@@ -42,7 +42,7 @@ Should be declared by pattern `vkcn-prefix <any-appropriate-name>`. Recommended 
 
 non kebab case prefix will be _ignored_ and fallback to default naming
 
-##### Examples
+##### :eyes: Examples
 
 - `SomeComponentName.vue`
 
@@ -88,7 +88,7 @@ Modifiers can be nested only once
 
 Modifiers can not be applied to type elements
 
-##### Examples
+##### :eyes: Examples
 
 ```css
 .some-component-name--some-element {}
@@ -120,7 +120,7 @@ Nesting can be used only
    - pseudo selector
    - attribute selector
 
-##### Examples
+##### :eyes: Examples
 
 ```scss
 // 1

@@ -9,6 +9,7 @@ const tester = new RuleTester({
     ecmaVersion: 2019,
     sourceType: "module",
   },
+  settings: { "vkcn/class-attr-name": /^(-?bar|baz|class)$/ },
 });
 
 tester.run("no-undefined-class-names", rule as any, {
@@ -39,8 +40,7 @@ tester.run("no-undefined-class-names", rule as any, {
         .bar {}
       </style>
     `,
-    {
-      code: /* html */ `
+    /* html */ `
         <template>
           <div bar="foo" :baz="'foo'"></div>
         </template>
@@ -48,20 +48,6 @@ tester.run("no-undefined-class-names", rule as any, {
           .foo {}
         </style>
       `,
-      options: [{ classAttrNameList: ["bar", "baz"] }],
-    },
-    {
-      code: /* html */ `
-        <template>
-          <div foo-bar="foo" :baz-bar="'foo'"></div>
-          <div class='class-ignored-when-custom-regexp-provided'"></div>
-          </template>
-        <style>
-          .foo {}
-        </style>
-      `,
-      options: [{ classAttrNameRegexp: "/-bar$/" }],
-    },
     /* html */ `
       <template>
         <div :class="{foo: true, bar}"></div>
@@ -229,7 +215,6 @@ tester.run("no-undefined-class-names", rule as any, {
           }
         </style>
       `,
-      options: [{ classAttrNameList: ["bar", "baz"] }],
       errors: [
         {
           messageId: "undefined",
@@ -290,84 +275,6 @@ tester.run("no-undefined-class-names", rule as any, {
                 <style>
                   .foo {
                   }
-                </style>
-              `,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      code: html`
-        <template>
-          <div foo-bar="foobar" :baz-bar="'foobaz'"></div>
-          <div class='class-ignored-when-custom-regexp-provided'"></div>
-        </template>
-        <style>
-          .foo {}
-        </style>
-      `,
-      options: [{ classAttrNameRegexp: "/-bar$/" }],
-      errors: [
-        {
-          messageId: "undefined",
-          data: { className: "foobar" },
-          line: 3,
-          column: 15,
-          endLine: 3,
-          endColumn: 21,
-          suggestions: [
-            {
-              output: html`
-                <template>
-                  <div foo-bar="" :baz-bar="'foobaz'"></div>
-                  <div class='class-ignored-when-custom-regexp-provided'"></div>
-                </template>
-                <style>
-                  .foo {}
-                </style>
-              `,
-            },
-            {
-              output: html`
-                <template>
-                  <div foo-bar="foo" :baz-bar="'foobaz'"></div>
-                  <div class='class-ignored-when-custom-regexp-provided'"></div>
-                </template>
-                <style>
-                  .foo {}
-                </style>
-              `,
-            },
-          ],
-        },
-        {
-          messageId: "undefined",
-          data: { className: "foobaz" },
-          line: 3,
-          column: 33,
-          endLine: 3,
-          endColumn: 41,
-          suggestions: [
-            {
-              output: html`
-                <template>
-                  <div foo-bar="foobar" :baz-bar=""></div>
-                  <div class='class-ignored-when-custom-regexp-provided'"></div>
-                </template>
-                <style>
-                  .foo {}
-                </style>
-              `,
-            },
-            {
-              output: html`
-                <template>
-                  <div foo-bar="foobar" :baz-bar="'foo'"></div>
-                  <div class='class-ignored-when-custom-regexp-provided'"></div>
-                </template>
-                <style>
-                  .foo {}
                 </style>
               `,
             },

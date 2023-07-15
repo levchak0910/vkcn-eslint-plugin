@@ -10,61 +10,35 @@ This rule statically analyzes class selectors among the selectors defined in `<s
 
 _Tip_: when class is defined in `<style>` but mistyped in `<template>` - use eslint suggestions to select one of defined class names
 
+### :eyes: Examples
+
+```vue
+<template>
+  <!-- ✗ BAD -->
+  <div class="class-a"></div>
+  <div class="class-c"></div>
+  <!-- ✓ GOOD -->
+  <div class="class-b"></div>
+</template>
+
+<style>
+.class-b {}
+</style>
+```
+
 ## :wrench: Options
 
 ```json
 {
   "vue-kebab-class-naming/no-undefined-class-names": ["error", {
-    "classAttrNameList": [],
-    "classAttrNameRegexp": "",
     "ignoreClassNameList": [],
     "ignoreClassNameRegexps": [],
   }]
 }
 ```
 
-- `classAttrNameList` ... Array of additional attribute names (as a string) that are considered to be checked. Default is `[]`.
-- `classAttrNameRegexp` ... Regexp (as a string) for matching all attribute names that are considered to be checked. Default is `undefined`. When using this option
-  - **include** `class` into your regexp
-  - `classAttrNameList` is **ignored**
 - `ignoreClassNameList` ... Array of class names (as a string) that are considered to be ignored. Default is `[]`.
 - `ignoreClassNameRegexps` ... Array of regular expressions (as a string) that will be checked against the class names that are considered to be ignored. Default is `[]`.
-
-### `"classAttrNameList": ["prop-class"]`
-
-```vue
-<template>
-  <!-- ✗ BAD -->
-  <div class="class-a"></div>
-  <AnyComponent prop-class="class-a"></AnyComponent>
-  <!-- ✓ GOOD -->
-  <div class="class-b"></div>
-  <AnyComponent prop-class="class-b"></AnyComponent>
-</template>
-
-<style>
-.class-b {}
-</style>
-```
-
-### `"classAttrNameRegexp": "/-class$/", "classAttrNameList": ["prop-class-name"]`
-
-```vue
-<template>
-  <!-- ✗ BAD -->
-  <AnyComponent prop1-class="class-a"></AnyComponent>
-  <AnyComponent prop2-class="class-a"></AnyComponent>
-  <!-- ✓ GOOD -->
-  <AnyComponent prop1-class="class-b"></AnyComponent>
-  <AnyComponent prop2-class="class-b"></AnyComponent>
-  <div class="class-a"></div> <!-- Not checked! -->
-  <AnyComponent prop-class-name="class-a"></AnyComponent> <!-- Not checked! -->
-</template>
-
-<style>
-.class-b {}
-</style>
-```
 
 ### `"ignoreClassNameList": ["class-c"]`
 

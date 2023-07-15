@@ -1,3 +1,6 @@
+// eslint-disable-next-line eslint-comments/disable-enable-pair -- ignore
+/* eslint-disable @typescript-eslint/no-explicit-any -- ignore */
+
 import type AST from "vue-eslint-parser/ast";
 import type * as postcss from "postcss";
 import type selectorParser from "postcss-selector-parser";
@@ -77,9 +80,7 @@ interface ParserServices {
    * @link https://github.com/vuejs/vue-eslint-parser/blob/fafbc7d38d38b31f5db529e2633af6736f30cce9/src/parser-services.ts#L53
    */
   defineTemplateBodyVisitor(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- inherit from vue-eslint-parser
     templateBodyVisitor: { [key: string]: (...args: any) => void },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- inherit from vue-eslint-parser
     scriptVisitor?: { [key: string]: (...args: any) => void },
     options?: {
       templateBodyTriggerSelector: "Program" | "Program:exit";
@@ -101,10 +102,10 @@ export interface RuleContext {
   id: string;
   getSourceCode: () => SourceCode;
   report: (descriptor: ReportDescriptor) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ignore
   options: any[];
   getFilename: () => string;
   parserServices: ParserServices;
+  settings?: Record<string, any>;
 }
 
 interface Fix {
@@ -112,7 +113,6 @@ interface Fix {
   text: string;
 }
 export interface RuleFixer {
-  /* eslint-disable @typescript-eslint/no-explicit-any -- ignore */
   insertTextAfter(nodeOrToken: any, text: string): Fix;
 
   insertTextAfterRange(range: Range, text: string): Fix;
@@ -128,8 +128,6 @@ export interface RuleFixer {
   replaceText(nodeOrToken: any, text: string): Fix;
 
   replaceTextRange(range: Range, text: string): Fix;
-
-  /* eslint-enable @typescript-eslint/no-explicit-any -- ignore */
 }
 
 export type ReportSuggestion = ({ messageId: string } | { desc: string }) & {
@@ -176,7 +174,6 @@ export interface SourceCode {
   ast: AST.ESLintProgram;
   lines: string[];
   hasBOM: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ignore
   visitorKeys: any;
   scopeManager: ScopeManager;
   getAllComments: () => AST.Token[];

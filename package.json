@@ -25,6 +25,7 @@
   "license": "MIT",
   "keywords": [
     "eslint",
+    "eslintplugin",
     "eslint-plugin",
     "vue",
     "classes",
