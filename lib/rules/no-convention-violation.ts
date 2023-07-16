@@ -74,20 +74,29 @@ export = {
     if (styles.length === 0) return {};
 
     const reporter = getCommentDirectivesReporter(context);
+    const reportedMap = new Map<string, Set<VCSSSelectorNode>>();
 
     function report(
       node: VCSSSelectorNode,
       descriptorOrMessage: string | Partial<ReportDescriptor> = {},
     ) {
-      const descriptor: Partial<ReportDescriptor> =
+      const descriptor: Partial<ReportDescriptor & { messageId: string }> =
         typeof descriptorOrMessage === "string"
           ? { messageId: descriptorOrMessage }
           : descriptorOrMessage;
 
+      const messageId = descriptor.messageId ?? "no-violation";
+
+      const reportedNodes = reportedMap.get(messageId);
+      if (reportedNodes?.has(node)) return;
+
+      if (!reportedNodes) reportedMap.set(messageId, new Set([node]));
+      else reportedNodes.add(node);
+
       reporter.report({
         node,
         loc: node.loc,
-        messageId: "no-violation",
+        messageId,
         data: {},
         ...descriptor,
       });
