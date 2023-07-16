@@ -45,7 +45,6 @@ export = {
   meta: {
     docs: {
       description: "disallow dynamic class names usage",
-      categories: [],
       default: "error",
       url: "https://github.com/levchak0910/eslint-plugin-vue-kebab-class-naming/blob/main/docs/rules/no-dynamic-class-names.md",
     },

@@ -26,8 +26,7 @@ import type { ValidStyleContext } from "../styles/context";
 export = {
   meta: {
     docs: {
-      description: "enforce convention.",
-      categories: [""],
+      description: "enforce convention",
       default: "error",
       url: "https://github.com/levchak0910/eslint-plugin-vue-kebab-class-naming/blob/main/docs/rules/no-convention-violation.md",
     },
