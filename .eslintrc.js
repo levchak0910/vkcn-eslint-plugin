@@ -22,12 +22,18 @@ module.exports = {
     "eslint-comments/no-unused-disable": "error",
     "@typescript-eslint/no-non-null-assertion": "off",
     complexity: "off",
+    "@typescript-eslint/unbound-method": "off",
+
     "prettier/prettier": [
       "error",
       {
         singleQuote: false,
         trailingComma: "all",
       },
+    ],
+    "eslint-plugin/test-case-property-ordering": [
+      "error",
+      ["name", "filename", "settings", "options", "code"],
     ],
   },
   overrides: [

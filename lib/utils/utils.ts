@@ -1,3 +1,4 @@
+import type { ESLintNode, VNode } from "vue-eslint-parser/ast";
 import type { RuleContext } from "../types";
 import { isRegExp, toRegExp } from "./regexp";
 
@@ -32,4 +33,23 @@ export function isSatisfyList(list: string[], item: string): boolean {
   }
 
   return itemSatisfies;
+}
+
+export function getParentByType<T extends VNode["type"] | ESLintNode["type"]>(
+  node: VNode | ESLintNode,
+  type: T,
+): T extends VNode["type"]
+  ? Extract<VNode, { type: T }>
+  : Extract<ESLintNode, { type: T }> {
+  if (node === null) throw new Error("node SHOULD BE PROVIDED");
+
+  let parent = node.parent;
+  while (parent && parent?.type !== type) {
+    parent = parent.parent;
+  }
+
+  if (!parent) throw new Error("parent SHOULD BE AVAILABLE");
+
+  // @ts-expect-error -- it is fine
+  return parent;
 }

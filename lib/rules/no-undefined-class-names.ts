@@ -1,8 +1,15 @@
-import type { VAttribute } from "vue-eslint-parser/ast";
-import type { Literal, Property, TemplateLiteral } from "estree";
-import type { SourceLocation, Position } from "estree";
+import type {
+  VAttribute,
+  VDirective,
+  VStartTag,
+  ESLintStringLiteral,
+  ESLintProperty,
+  ESLintTemplateLiteral,
+} from "vue-eslint-parser/ast";
+import type { SourceLocation, Position, Node } from "estree";
 import { isObject, isString } from "lodash";
 import { distance } from "fastest-levenshtein";
+import { query } from "esquery";
 
 import { getResolvedSelectors } from "../styles/selectors";
 import type { VCSSSelectorNode } from "../styles/ast";
@@ -13,15 +20,47 @@ import {
   getStyleContexts,
   getCommentDirectivesReporter,
 } from "../styles/context";
-import { hasTemplateBlock, isDefined, isSatisfyList } from "../utils/utils";
-import { getClassAttrNameRegexp } from "../utils/class-attr";
+import {
+  getParentByType,
+  hasTemplateBlock,
+  isDefined,
+  isSatisfyList,
+} from "../utils/utils";
+import { getClassAttrNameRegexp, getAttrName } from "../utils/class-attr";
 
-function getSelectors(style: ValidStyleContext): VCSSSelectorNode[] {
-  const resolvedSelectors = getResolvedSelectors(style);
-  return resolvedSelectors
-    .map((resolvedSelector) => resolvedSelector.selector)
-    .filter(isDefined)
-    .flat();
+function getAllSelectorsFromStyles(
+  styles: ValidStyleContext[],
+): VCSSSelectorNode[][] {
+  return styles.flatMap((style) => {
+    const resolvedSelectors = getResolvedSelectors(style);
+    return resolvedSelectors
+      .map((resolvedSelector) => resolvedSelector.selector)
+      .filter(isDefined);
+  });
+}
+
+function getVKCNClasses(
+  selectorGroups: VCSSSelectorNode[][],
+): Map<string, Set<string>> {
+  const map = new Map<string, Set<string>>();
+
+  selectorGroups.forEach((selectorGroup) => {
+    const classSelectors = selectorGroup.filter(isClassSelector);
+    const elementSelector = classSelectors[0].value;
+
+    if (!map.has(elementSelector)) {
+      map.set(elementSelector, new Set());
+    }
+
+    if (classSelectors.length <= 1) return;
+
+    classSelectors.slice(1).forEach((selector) => {
+      const modifierClasses = map.get(elementSelector)!;
+      modifierClasses.add(selector.value);
+    });
+  });
+
+  return map;
 }
 
 function getClassPositionInSingleLine(
@@ -72,6 +111,96 @@ function getClassPosition(
   return { isMultiline, line, startColumn };
 }
 
+function getClassesFromClassString(classString: string): string[] {
+  return classString
+    .split(" ")
+    .flatMap((line) => line.split("\r"))
+    .flatMap((line) => line.split("\n"))
+    .filter(Boolean);
+}
+
+function getAllClassesFromExpression(expression: Node): string[] {
+  const literals = query(
+    expression,
+    "Literal:not(ConditionalExpression .test Literal):not(Property .value Literal)",
+  );
+  const properties = query(expression, "Property");
+  const templateElements = query(expression, "TemplateElement");
+
+  const classesFromLiterals = literals.flatMap((literal) => {
+    if (literal.type !== "Literal") return [];
+    return getClassesFromClassString(
+      typeof literal.value === "string" ? literal.value : "",
+    );
+  });
+
+  const classesFromProperties = properties.flatMap((property) => {
+    if (property.type !== "Property") return [];
+
+    return getClassesFromClassString(
+      property.key.type === "Identifier" ? property.key.name : "",
+    );
+  });
+
+  const classesFromTemplateElements = templateElements.flatMap(
+    (templateElement) => {
+      if (templateElement.type !== "TemplateElement") return [];
+
+      return getClassesFromClassString(templateElement.value.raw);
+    },
+  );
+
+  return [
+    ...classesFromLiterals,
+    ...classesFromProperties,
+    ...classesFromTemplateElements,
+  ];
+}
+
+type ClassesFromTag = {
+  valid: 0 | 1 | 2;
+  element: string;
+  modifiers: string[];
+};
+
+function getAllClassesFromTag(
+  tag: VStartTag,
+  classAttrName: string,
+): ClassesFromTag {
+  const tagClasses: string[] = [];
+
+  tag.attributes.forEach((attr) => {
+    if (
+      attr.key.type === "VIdentifier" &&
+      classAttrName === attr.key.name &&
+      attr.value?.type === "VLiteral"
+    ) {
+      const classes = getClassesFromClassString(attr.value.value);
+      tagClasses.push(...classes);
+    }
+
+    if (
+      attr.key.type === "VDirectiveKey" &&
+      attr.key.argument?.type === "VIdentifier" &&
+      classAttrName === attr.key.argument.name &&
+      attr.value?.type === "VExpressionContainer"
+    ) {
+      const classes = getAllClassesFromExpression(
+        attr.value.expression as Node,
+      );
+      tagClasses.push(...classes);
+    }
+  });
+
+  const elements = tagClasses.filter((c) => c.includes("--"));
+  const modifiers = tagClasses.filter((c) => !c.includes("--"));
+
+  const valid = elements.length === 0 ? 0 : elements.length === 1 ? 1 : 2;
+  const element = elements[0];
+
+  return { valid, element, modifiers };
+}
+
 export = {
   meta: {
     docs: {
@@ -82,7 +211,9 @@ export = {
     },
     fixable: null,
     messages: {
-      undefined: "The class name `{{className}}` is undefined.",
+      "undefined-element": "The element class name is undefined.",
+      "excess-element": "The element class name is undefined.",
+      "undefined-modifier": "The class name `{{className}}` is undefined.",
       useDefined: "Use '{{className}}' instead.",
       removeUndefined: "Remove class name '{{className}}' from template.",
     },
@@ -112,17 +243,18 @@ export = {
     const reporter = getCommentDirectivesReporter(context);
 
     const classAttrRegexp = getClassAttrNameRegexp(context);
+    const classAttrRegexpAsString = classAttrRegexp.toString();
 
     const ignoreClassNames =
       (context.options[0]?.ignoreClassNames as string[]) ?? [];
 
-    const classSelectors = styles
-      .map(getSelectors)
-      .flat()
-      .filter(isClassSelector);
+    const selectorGroups = getAllSelectorsFromStyles(styles);
+    const vkcnClassSelectors = getVKCNClasses(selectorGroups);
 
     function reportClass({
       className,
+      classType,
+      elementClass,
       kind,
       transform,
       location,
@@ -131,6 +263,8 @@ export = {
       endCol,
     }: {
       className: string;
+      classType: "element" | "modifier";
+      elementClass?: string;
       kind: "plain" | "quotable" | "quoted";
       transform?: (adaptedClassName: string, oldClassName?: string) => string;
       location?: SourceLocation;
@@ -155,9 +289,15 @@ export = {
       const startIndex = source.getIndexFromLoc(start);
       const endIndex = source.getIndexFromLoc(end);
 
+      const allAvailableClasses = className.includes("--")
+        ? Array.from(vkcnClassSelectors.keys())
+        : Array.from(
+            vkcnClassSelectors.get(elementClass ?? className)?.values() ?? [],
+          );
+
       reporter.report({
         loc: { start, end },
-        messageId: "undefined",
+        messageId: `undefined-${classType}`,
         data: { className },
         suggest: [
           {
@@ -167,18 +307,18 @@ export = {
               return fixer.removeRange([startIndex, endIndex]);
             },
           },
-          ...classSelectors
-            .map((classSelector) => {
-              let adaptedClassName = classSelector.value;
+          ...allAvailableClasses
+            .map((availableClassName) => {
+              let adaptedClassName = availableClassName;
 
               if (kind === "quoted")
-                adaptedClassName = `'${classSelector.value}'`;
+                adaptedClassName = `'${availableClassName}'`;
 
-              if (kind === "quotable" && classSelector.value.includes("-"))
-                adaptedClassName = `'${classSelector.value}'`;
+              if (kind === "quotable" && availableClassName.includes("-"))
+                adaptedClassName = `'${availableClassName}'`;
 
               return {
-                className: classSelector.value,
+                className: availableClassName,
                 adaptedClassName,
               };
             })
@@ -233,175 +373,263 @@ export = {
       });
     }
 
-    function handleClass(
+    function handleClassList(
       classListString: string,
-      report: (notFoundClassName: string) => void,
+      elementClass: string,
+      report: (
+        notFoundClassName: string,
+        classType: "element" | "modifier",
+      ) => void,
     ): void {
       const classes = classListString
         .trim()
         .split(" ")
         .map((c) => c.trim())
-        .filter((c) => c.length > 0);
+        .filter((c) => c.length > 0)
+        .filter((c) => !isSatisfyList(ignoreClassNames, c));
 
       classes.forEach((className) => {
-        if (isSatisfyList(ignoreClassNames, className)) return;
+        if (className === elementClass && !vkcnClassSelectors.has(className)) {
+          report(className, "element");
+        }
 
-        const foundSelector = classSelectors.find((s) => s.value === className);
+        if (className !== elementClass) {
+          const modifierClasses = vkcnClassSelectors.get(elementClass);
 
-        if (foundSelector === undefined) {
-          report(className);
+          if (!modifierClasses || !modifierClasses.has(className)) {
+            report(className, "modifier");
+          }
         }
       });
     }
 
+    function reportInvalidAttr(
+      attr: VAttribute | VDirective,
+      attrClasses: ClassesFromTag,
+    ): boolean {
+      if (attrClasses.valid !== 1) {
+        reporter.report({
+          node: attr,
+          messageId:
+            attrClasses.valid === 0 ? "undefined-element" : "excess-element",
+        });
+        return true;
+      }
+
+      return false;
+    }
+
     return context.parserServices.defineTemplateBodyVisitor({
-      [`VAttribute[key.name=${classAttrRegexp}]`](attr: VAttribute) {
+      [`VAttribute[key.name=${classAttrRegexpAsString}]`](attr: VAttribute) {
         const classListString = attr.value?.value;
         if (classListString === undefined) return;
 
-        handleClass(classListString, (className) => {
-          const { isMultiline, line, startColumn } = getClassPosition(
-            classListString,
-            className,
-          );
+        const tag = getParentByType(attr, "VStartTag");
+        const attrClasses = getAllClassesFromTag(tag, attr.key.name);
 
-          const reportLine = attr.loc.start.line + line;
-          const reportStartColumn = isMultiline
-            ? startColumn
-            : attr.loc.start.column + startColumn + attr.key.name.length + 2;
-          const reportEndColumn = reportStartColumn + className.length;
+        if (reportInvalidAttr(attr, attrClasses)) return;
 
-          reportClass({
-            className,
-            kind: "plain",
-            line: reportLine,
-            startCol: reportStartColumn,
-            endCol: reportEndColumn,
-          });
-        });
+        handleClassList(
+          classListString,
+          attrClasses.element,
+          (className, classType) => {
+            const { isMultiline, line, startColumn } = getClassPosition(
+              classListString,
+              className,
+            );
+
+            const reportLine = attr.loc.start.line + line;
+            const reportStartColumn = isMultiline
+              ? startColumn
+              : attr.loc.start.column + startColumn + attr.key.name.length + 2;
+            const reportEndColumn = reportStartColumn + className.length;
+
+            reportClass({
+              className,
+              classType,
+              elementClass: attrClasses.element,
+              kind: "plain",
+              line: reportLine,
+              startCol: reportStartColumn,
+              endCol: reportEndColumn,
+            });
+          },
+        );
       },
-      [`VAttribute[key.argument.name=${classAttrRegexp}] VExpressionContainer Literal:not(ConditionalExpression .test Literal):not(Property .value Literal)`](
-        literal: Literal,
+      [`VAttribute[key.argument.name=${classAttrRegexpAsString}] VExpressionContainer Literal:not(ConditionalExpression .test Literal):not(Property .value Literal)`](
+        literal: ESLintStringLiteral,
       ) {
         if (!isString(literal.value)) return;
 
-        const literalLoc = literal.loc!;
+        const attr = getParentByType(literal, "VAttribute");
+        const tag = getParentByType(attr, "VStartTag");
+        const attrName = getAttrName(attr);
+        const attrClasses = getAllClassesFromTag(tag, attrName);
+
+        if (reportInvalidAttr(attr, attrClasses)) return;
+
+        const literalLoc = literal.loc;
         const classListString = isString(literal.value) ? literal.value : "";
         const isClassListSingle = classListString.split(" ").length <= 1;
 
         if (isClassListSingle) {
-          handleClass(classListString, (className) => {
-            reportClass({
-              className,
-              kind: "quoted",
-              location: literalLoc,
-            });
-          });
+          handleClassList(
+            classListString,
+            attrClasses.element,
+            (className, classType) => {
+              reportClass({
+                className,
+                classType,
+                elementClass: attrClasses.element,
+                kind: "quoted",
+                location: literalLoc,
+              });
+            },
+          );
           return;
         }
 
-        handleClass(classListString, (className) => {
-          const { startColumn } = getClassPosition(classListString, className);
+        handleClassList(
+          classListString,
+          attrClasses.element,
+          (className, classType) => {
+            const { startColumn } = getClassPosition(
+              classListString,
+              className,
+            );
 
-          const reportStartColumn = literalLoc.start.column + startColumn + 1;
-          const reportEndColumn = reportStartColumn + className.length;
+            const reportStartColumn = literalLoc.start.column + startColumn + 1;
+            const reportEndColumn = reportStartColumn + className.length;
 
-          reportClass({
-            className,
-            kind: "quoted",
-            line: literalLoc.start.line,
-            startCol: reportStartColumn,
-            endCol: reportEndColumn,
-          });
-        });
+            reportClass({
+              className,
+              classType,
+              elementClass: attrClasses.element,
+              kind: "plain",
+              line: literalLoc.start.line,
+              startCol: reportStartColumn,
+              endCol: reportEndColumn,
+            });
+          },
+        );
       },
-      [`VAttribute[key.argument.name=${classAttrRegexp}] VExpressionContainer TemplateLiteral`](
-        templateLiteral: TemplateLiteral,
+      [`VAttribute[key.argument.name=${classAttrRegexpAsString}] VExpressionContainer TemplateLiteral`](
+        templateLiteral: ESLintTemplateLiteral,
       ) {
+        const attr = getParentByType(templateLiteral, "VAttribute");
+        const tag = getParentByType(attr, "VStartTag");
+        const attrName = getAttrName(attr);
+        const attrClasses = getAllClassesFromTag(tag, attrName);
+
+        if (reportInvalidAttr(attr, attrClasses)) return;
+
+        const elementClass = attrClasses.element;
+
         templateLiteral.quasis.forEach(
           (templateElement, templateElementIndex) => {
             const classListString = templateElement.value.raw;
-            const templateElementLoc = templateElement.loc!;
+            const templateElementLoc = templateElement.loc;
 
-            handleClass(classListString, (className) => {
-              const { isMultiline, line, startColumn } = getClassPosition(
-                classListString,
-                className,
-              );
+            handleClassList(
+              classListString,
+              elementClass,
+              (className, classType) => {
+                const { isMultiline, line, startColumn } = getClassPosition(
+                  classListString,
+                  className,
+                );
 
-              if (!isMultiline) {
+                if (!isMultiline) {
+                  const reportLine = templateElementLoc.start.line + line;
+                  const reportStartColumn =
+                    templateElementLoc.start.column + startColumn + 1;
+                  const reportEndColumn = reportStartColumn + className.length;
+
+                  reportClass({
+                    className,
+                    classType,
+                    elementClass,
+                    kind: "plain",
+                    line: reportLine,
+                    startCol: reportStartColumn,
+                    endCol: reportEndColumn,
+                  });
+
+                  return;
+                }
+
+                const prevTemplateElement =
+                  templateLiteral.quasis[templateElementIndex - 1];
+                const prevTemplateElementLoc = prevTemplateElement?.loc;
+
+                const isOnTheSameLineWithPreviousSinglelineElement =
+                  prevTemplateElementLoc?.start.line ===
+                  templateElementLoc.start.line;
+
+                const isOnTheSameLineWithPreviousMultilineElement =
+                  prevTemplateElement?.value.raw.includes("\n") &&
+                  (prevTemplateElementLoc?.start.line ?? NaN) + 1 ===
+                    templateElementLoc.start.line;
+
+                const isAfterPreviousElement =
+                  (prevTemplateElementLoc?.start.column ?? NaN) <
+                  templateElementLoc.start.column;
+
+                const isOnTheSameLineWithPreviousElement =
+                  isOnTheSameLineWithPreviousMultilineElement ||
+                  (isOnTheSameLineWithPreviousSinglelineElement &&
+                    isAfterPreviousElement);
+
                 const reportLine = templateElementLoc.start.line + line;
                 const reportStartColumn =
-                  templateElementLoc.start.column + startColumn + 1;
+                  isOnTheSameLineWithPreviousElement && line === 0
+                    ? templateElementLoc.start.column + startColumn + 1
+                    : startColumn;
                 const reportEndColumn = reportStartColumn + className.length;
 
                 reportClass({
                   className,
+                  classType,
+                  elementClass,
                   kind: "plain",
                   line: reportLine,
                   startCol: reportStartColumn,
                   endCol: reportEndColumn,
                 });
-
-                return;
-              }
-
-              const prevTemplateElement =
-                templateLiteral.quasis[templateElementIndex - 1];
-              const prevTemplateElementLoc = prevTemplateElement?.loc;
-
-              const isOnTheSameLineWithPreviousSinglelineElement =
-                prevTemplateElementLoc?.start.line ===
-                templateElementLoc.start.line;
-
-              const isOnTheSameLineWithPreviousMultilineElement =
-                prevTemplateElement?.value.raw.includes("\n") &&
-                (prevTemplateElementLoc?.start.line ?? NaN) + 1 ===
-                  templateElementLoc.start.line;
-
-              const isAfterPreviousElement =
-                (prevTemplateElementLoc?.start.column ?? NaN) <
-                templateElementLoc.start.column;
-
-              const isOnTheSameLineWithPreviousElement =
-                isOnTheSameLineWithPreviousMultilineElement ||
-                (isOnTheSameLineWithPreviousSinglelineElement &&
-                  isAfterPreviousElement);
-
-              const reportLine = templateElementLoc.start.line + line;
-              const reportStartColumn =
-                isOnTheSameLineWithPreviousElement && line === 0
-                  ? templateElementLoc.start.column + startColumn + 1
-                  : startColumn;
-              const reportEndColumn = reportStartColumn + className.length;
-
-              reportClass({
-                className,
-                kind: "plain",
-                line: reportLine,
-                startCol: reportStartColumn,
-                endCol: reportEndColumn,
-              });
-            });
+              },
+            );
           },
         );
       },
-      [`VAttribute[key.argument.name=${classAttrRegexp}] VExpressionContainer Property`](
-        property: Property,
+      [`VAttribute[key.argument.name=${classAttrRegexpAsString}] VExpressionContainer Property`](
+        property: ESLintProperty,
       ) {
         if (property.key.type !== "Identifier") return;
 
-        handleClass(property.key.name, (className) => {
-          reportClass({
-            className,
-            kind: "quotable",
-            transform: (adaptedClassName, oldClassName) =>
-              property.shorthand
-                ? `${adaptedClassName}: ${oldClassName}`
-                : adaptedClassName,
-            location: property.key.loc!,
-          });
-        });
+        const attr = getParentByType(property, "VAttribute");
+        const tag = getParentByType(attr, "VStartTag");
+        const attrName = getAttrName(attr);
+        const attrClasses = getAllClassesFromTag(tag, attrName);
+
+        if (reportInvalidAttr(attr, attrClasses)) return;
+
+        handleClassList(
+          property.key.name,
+          attrClasses.element,
+          (className, classType) => {
+            reportClass({
+              className,
+              classType,
+              elementClass: attrClasses.element,
+              kind: "quotable",
+              transform: (adaptedClassName, oldClassName) =>
+                property.shorthand
+                  ? `${adaptedClassName}: ${oldClassName}`
+                  : adaptedClassName,
+              location: property.key.loc,
+            });
+          },
+        );
       },
     });
   },

@@ -9,109 +9,176 @@ const tester = new RuleTester({
     ecmaVersion: 2019,
     sourceType: "module",
   },
-  settings: { "vkcn/class-attr-name": /^(-?bar|baz|class)$/ },
 });
 
 tester.run("no-undefined-class-names", rule as any, {
   valid: [
-    /* html */ `
-      <template>
-        <div class="foo"></div>
-      </template>
-      <style>
-        .foo {}
-      </style>
-    `,
-    /* html */ `
-      <template>
-        <div :class="'foo'"></div>
-      </template>
-      <style>
-        .foo {}
-      </style>
-    `,
-    /* html */ `
-      <template>
-        <div :class="bar === '/' ? 'foo' : ''"></div>
-        <div :class="['bam'].includes('baz') ? 'foo' : 'bar'"></div>
-      </template>
-      <style>
-        .foo {}
-        .bar {}
-      </style>
-    `,
-    /* html */ `
-        <template>
-          <div bar="foo" :baz="'foo'"></div>
-        </template>
-        <style>
-          .foo {}
-        </style>
-      `,
-    /* html */ `
-      <template>
-        <div :class="{foo: true, bar}"></div>
-      </template>
-      <style>
-        .foo {}
-        .bar {}
-      </style>
-    `,
-    /* html */ `
-      <template>
-        <div
-          :class="\`
-            foo bar \${any} baz
-            \${any} foobar
-          \`"
-        ></div>
-      </template>
-      <style>
-        .foo, .bar, .baz, .foobar {}
-      </style>
-    `,
     {
-      code: /* html */ `
+      name: "static attribute",
+      filename: "app.vue",
+      code: html`
         <template>
-          <div class="bar"></div>
+          <div class="app--foo bar"></div>
         </template>
         <style>
-          .foo {}
+          .app--foo,
+          .app--foo.bar {
+          }
         </style>
       `,
-      options: [{ ignoreClassNames: ["bar"] }],
     },
     {
-      code: /* html */ `
+      name: "dynamic attribute",
+      filename: "app.vue",
+      code: html`
         <template>
-          <div class="foobar foobaz"></div>
+          <div :class="'app--foo bar'"></div>
+          <div :class="['app--foo', 'bar']"></div>
         </template>
         <style>
-          .foo {}
+          .app--foo,
+          .app--foo.bar {
+          }
         </style>
       `,
-      options: [{ ignoreClassNames: ["/^foo/"] }],
+    },
+    {
+      name: "default conditional",
+      filename: "app.vue",
+      code: html`
+        <template>
+          <div
+            class="app--foo"
+            :class="'app--bam' === '/' ? 'bar' : 'baz'"
+          ></div>
+        </template>
+        <style>
+          .app--foo,
+          .app--foo.bar,
+          .app--foo.baz {
+          }
+        </style>
+      `,
+    },
+    {
+      name: "custom attribute names",
+      filename: "app.vue",
+      settings: { "vkcn/class-attr-name": /^(bar|baz)$/ },
+      code: html`
+        <template>
+          <div bar="app--foo" :baz="'app--foo'"></div>
+        </template>
+        <style>
+          .app--foo {
+          }
+        </style>
+      `,
+    },
+    {
+      name: "classes as object",
+      filename: "app.vue",
+      code: html`
+        <template>
+          <div
+            :class="{'app--foo': true, bar, baz: condition, 'bam': 'app--foo' === '/'}"
+          ></div>
+        </template>
+        <style>
+          .app--foo,
+          .app--foo.bar,
+          .app--foo.baz,
+          .app--foo.bam {
+          }
+        </style>
+      `,
+    },
+    {
+      name: "template literals",
+      filename: "app.vue",
+      code: html`
+        <template>
+          <div
+            :class="\`
+               app--foo bar \${any} baz
+               \${any} foobar
+             \`"
+          ></div>
+        </template>
+        <style>
+          .app--foo,
+          .app--foo.bar,
+          .app--foo.baz,
+          .app--foo.foobar {
+          }
+        </style>
+      `,
+    },
+    {
+      name: "option: ignoreClassNames as string or regexp",
+      filename: "app.vue",
+      options: [{ ignoreClassNames: ["app--bar", "/^app--foo/"] }],
+      code: html`
+        <template>
+          <div class="app--bar"></div>
+          <div class="app--foobar"></div>
+          <div class="app--foobaz"></div>
+        </template>
+        <style>
+          .app--foo {
+          }
+        </style>
+      `,
     },
   ],
   invalid: [
     {
+      name: "element class not used",
+      filename: "app.vue",
       code: html`
         <template>
-          <div class="bar"></div>
+          <div class="foo"></div>
+          <div :class="'bar'"></div>
+        </template>
+      `,
+      errors: [
+        {
+          messageId: "undefined-element",
+          data: { className: "foo" },
+          line: 3,
+          column: 6,
+          endLine: 3,
+          endColumn: 17,
+        },
+        {
+          messageId: "undefined-element",
+          data: { className: "bar" },
+          line: 4,
+          column: 6,
+          endLine: 4,
+          endColumn: 20,
+        },
+      ],
+    },
+    {
+      name: "undefined element in static attribute",
+      filename: "app.vue",
+      code: html`
+        <template>
+          <div class="app--bar"></div>
         </template>
         <style>
-          .foo {
+          .app--foo {
           }
         </style>
       `,
       errors: [
         {
-          messageId: "undefined",
-          data: { className: "bar" },
+          messageId: "undefined-element",
+          data: { className: "app--bar" },
           line: 3,
           column: 13,
           endLine: 3,
-          endColumn: 16,
+          endColumn: 21,
           suggestions: [
             {
               output: html`
@@ -119,7 +186,7 @@ tester.run("no-undefined-class-names", rule as any, {
                   <div class=""></div>
                 </template>
                 <style>
-                  .foo {
+                  .app--foo {
                   }
                 </style>
               `,
@@ -127,10 +194,10 @@ tester.run("no-undefined-class-names", rule as any, {
             {
               output: html`
                 <template>
-                  <div class="foo"></div>
+                  <div class="app--foo"></div>
                 </template>
                 <style>
-                  .foo {
+                  .app--foo {
                   }
                 </style>
               `,
@@ -140,52 +207,85 @@ tester.run("no-undefined-class-names", rule as any, {
       ],
     },
     {
+      name: "undefined modifier in static attribute",
+      filename: "app.vue",
       code: html`
         <template>
-          <div class="foo-bar foo"></div>
+          <div class="app--foo baz"></div>
         </template>
         <style>
-          .foo-bar {
+          .app--foo,
+          .app--foo.bar {
           }
         </style>
       `,
       errors: [
         {
-          messageId: "undefined",
-          data: { className: "foo" },
+          messageId: "undefined-modifier",
+          data: { className: "baz" },
           line: 3,
-          column: 21,
+          column: 22,
           endLine: 3,
-          endColumn: 24,
+          endColumn: 25,
+          suggestions: [
+            {
+              output: html`
+                <template>
+                  <div class="app--foo "></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.bar {
+                  }
+                </style>
+              `,
+            },
+            {
+              output: html`
+                <template>
+                  <div class="app--foo bar"></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.bar {
+                  }
+                </style>
+              `,
+            },
+          ],
         },
       ],
     },
     {
+      name: "undefined element in dynamic attribute",
+      filename: "app.vue",
       code: html`
         <template>
-          <div :class="'bar'"></div>
+          <div :class="'app--bar'"></div>
+          <div :class="['app--baz']"></div>
         </template>
         <style>
-          .foo {
+          .app--foo {
           }
         </style>
       `,
       errors: [
         {
-          messageId: "undefined",
-          data: { className: "bar" },
+          messageId: "undefined-element",
+          data: { className: "app--bar" },
           line: 3,
           column: 14,
           endLine: 3,
-          endColumn: 19,
+          endColumn: 24,
           suggestions: [
             {
               output: html`
                 <template>
                   <div :class=""></div>
+                  <div :class="['app--baz']"></div>
                 </template>
                 <style>
-                  .foo {
+                  .app--foo {
                   }
                 </style>
               `,
@@ -193,10 +293,45 @@ tester.run("no-undefined-class-names", rule as any, {
             {
               output: html`
                 <template>
-                  <div :class="'foo'"></div>
+                  <div :class="'app--foo'"></div>
+                  <div :class="['app--baz']"></div>
                 </template>
                 <style>
-                  .foo {
+                  .app--foo {
+                  }
+                </style>
+              `,
+            },
+          ],
+        },
+        {
+          messageId: "undefined-element",
+          data: { className: "app--bar" },
+          line: 4,
+          column: 15,
+          endLine: 4,
+          endColumn: 25,
+          suggestions: [
+            {
+              output: html`
+                <template>
+                  <div :class="'app--bar'"></div>
+                  <div :class="[]"></div>
+                </template>
+                <style>
+                  .app--foo {
+                  }
+                </style>
+              `,
+            },
+            {
+              output: html`
+                <template>
+                  <div :class="'app--bar'"></div>
+                  <div :class="['app--foo']"></div>
+                </template>
+                <style>
+                  .app--foo {
                   }
                 </style>
               `,
@@ -206,368 +341,562 @@ tester.run("no-undefined-class-names", rule as any, {
       ],
     },
     {
+      name: "undefined modifier in dynamic attribute",
+      filename: "app.vue",
       code: html`
         <template>
-          <div bar="foobar" :baz="'foobaz'"></div>
+          <div :class="'app--foo bar baz'"></div>
+          <div :class="['app--foo', 'bar', 'bam']"></div>
         </template>
         <style>
-          .foo {
+          .app--foobar,
+          .app--foobar.barbaz,
+          .app--foo,
+          .app--foo.bar {
           }
         </style>
       `,
       errors: [
         {
-          messageId: "undefined",
-          data: { className: "foobar" },
+          messageId: "undefined-modifier",
+          data: { className: "baz" },
+          line: 3,
+          column: 28,
+          endLine: 3,
+          endColumn: 31,
+          suggestions: [
+            {
+              output: html`
+                <template>
+                  <div :class="'app--foo bar '"></div>
+                  <div :class="['app--foo', 'bar', 'bam']"></div>
+                </template>
+                <style>
+                  .app--foobar,
+                  .app--foobar.barbaz,
+                  .app--foo,
+                  .app--foo.bar {
+                  }
+                </style>
+              `,
+            },
+            {
+              output: html`
+                <template>
+                  <div :class="'app--foo bar bar'"></div>
+                  <div :class="['app--foo', 'bar', 'bam']"></div>
+                </template>
+                <style>
+                  .app--foobar,
+                  .app--foobar.barbaz,
+                  .app--foo,
+                  .app--foo.bar {
+                  }
+                </style>
+              `,
+            },
+          ],
+        },
+        {
+          messageId: "undefined-modifier",
+          data: { className: "bam" },
+          line: 4,
+          column: 34,
+          endLine: 4,
+          endColumn: 39,
+          suggestions: [
+            {
+              output: html`
+                <template>
+                  <div :class="'app--foo bar baz'"></div>
+                  <div :class="['app--foo', 'bar', ]"></div>
+                </template>
+                <style>
+                  .app--foobar,
+                  .app--foobar.barbaz,
+                  .app--foo,
+                  .app--foo.bar {
+                  }
+                </style>
+              `,
+            },
+            {
+              output: html`
+                <template>
+                  <div :class="'app--foo bar baz'"></div>
+                  <div :class="['app--foo', 'bar', 'bar']"></div>
+                </template>
+                <style>
+                  .app--foobar,
+                  .app--foobar.barbaz,
+                  .app--foo,
+                  .app--foo.bar {
+                  }
+                </style>
+              `,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "undefined with custom attribute names",
+      filename: "app.vue",
+      settings: { "vkcn/class-attr-name": /^(bar|baz)$/ },
+      code: html`
+        <template>
+          <div bar="app--foobar" :baz="'app--foobaz'"></div>
+          <div class="app--bam"></div>
+        </template>
+        <style>
+          .app--foo {
+          }
+        </style>
+      `,
+      errors: [
+        {
+          messageId: "undefined-element",
+          data: { className: "app--foobar" },
           line: 3,
           column: 11,
           endLine: 3,
-          endColumn: 17,
-          suggestions: [
-            {
-              output: html`
-                <template>
-                  <div bar="" :baz="'foobaz'"></div>
-                </template>
-                <style>
-                  .foo {
-                  }
-                </style>
-              `,
-            },
-            {
-              output: html`
-                <template>
-                  <div bar="foo" :baz="'foobaz'"></div>
-                </template>
-                <style>
-                  .foo {
-                  }
-                </style>
-              `,
-            },
-          ],
-        },
-        {
-          messageId: "undefined",
-          data: { className: "foobaz" },
-          line: 3,
-          column: 25,
-          endLine: 3,
-          endColumn: 33,
-          suggestions: [
-            {
-              output: html`
-                <template>
-                  <div bar="foobar" :baz=""></div>
-                </template>
-                <style>
-                  .foo {
-                  }
-                </style>
-              `,
-            },
-            {
-              output: html`
-                <template>
-                  <div bar="foobar" :baz="'foo'"></div>
-                </template>
-                <style>
-                  .foo {
-                  }
-                </style>
-              `,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      code: html`
-        <template>
-          <div :class="{bar: true, baz}"></div>
-        </template>
-        <style>
-          .foo {
-          }
-        </style>
-      `,
-      errors: [
-        {
-          messageId: "undefined",
-          data: { className: "bar" },
-          line: 3,
-          column: 15,
-          endLine: 3,
-          endColumn: 18,
-          suggestions: [
-            {
-              output: html`
-                <template>
-                  <div :class="{: true, baz}"></div>
-                </template>
-                <style>
-                  .foo {
-                  }
-                </style>
-              `,
-            },
-            {
-              output: html`
-                <template>
-                  <div :class="{foo: true, baz}"></div>
-                </template>
-                <style>
-                  .foo {
-                  }
-                </style>
-              `,
-            },
-          ],
-        },
-        {
-          messageId: "undefined",
-          data: { className: "baz" },
-          line: 3,
-          column: 26,
-          endLine: 3,
-          endColumn: 29,
-          suggestions: [
-            {
-              output: html`
-                <template>
-                  <div :class="{bar: true, }"></div>
-                </template>
-                <style>
-                  .foo {
-                  }
-                </style>
-              `,
-            },
-            {
-              output: html`
-                <template>
-                  <div :class="{bar: true, foo: baz}"></div>
-                </template>
-                <style>
-                  .foo {
-                  }
-                </style>
-              `,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      code: /* html */ `
-        <template>
-          <div
-            :class="\`
-              foo bar \${any} baz
-              \${any} foobar
-            \`"
-          ></div>
-        </template>
-        <style>
-          .foo {}
-        </style>
-      `,
-      errors: [
-        {
-          messageId: "undefined",
-          data: { className: "bar" },
-          line: 5,
-          column: 19,
-          endLine: 5,
           endColumn: 22,
           suggestions: [
             {
-              output: `
-        <template>
-          <div
-            :class="\`
-              foo  \${any} baz
-              \${any} foobar
-            \`"
-          ></div>
-        </template>
-        <style>
-          .foo {}
-        </style>
-      `,
+              output: html`
+                <template>
+                  <div bar="" :baz="'app--foobaz'"></div>
+                  <div class="app--bam"></div>
+                </template>
+                <style>
+                  .app--foo {
+                  }
+                </style>
+              `,
             },
             {
-              output: `
-        <template>
-          <div
-            :class="\`
-              foo foo \${any} baz
-              \${any} foobar
-            \`"
-          ></div>
-        </template>
-        <style>
-          .foo {}
-        </style>
-      `,
+              output: html`
+                <template>
+                  <div bar="app--foo" :baz="'app--foobaz'"></div>
+                  <div class="app--bam"></div>
+                </template>
+                <style>
+                  .app--foo {
+                  }
+                </style>
+              `,
             },
           ],
         },
         {
-          messageId: "undefined",
-          data: { className: "baz" },
-          line: 5,
-          column: 30,
-          endLine: 5,
-          endColumn: 33,
-          suggestions: [
-            {
-              output: `
-        <template>
-          <div
-            :class="\`
-              foo bar \${any} 
-              \${any} foobar
-            \`"
-          ></div>
-        </template>
-        <style>
-          .foo {}
-        </style>
-      `,
-            },
-            {
-              output: `
-        <template>
-          <div
-            :class="\`
-              foo bar \${any} foo
-              \${any} foobar
-            \`"
-          ></div>
-        </template>
-        <style>
-          .foo {}
-        </style>
-      `,
-            },
-          ],
-        },
-        {
-          messageId: "undefined",
-          data: { className: "foobar" },
-          line: 6,
-          column: 22,
-          endLine: 6,
-          endColumn: 28,
-          suggestions: [
-            {
-              output: `
-        <template>
-          <div
-            :class="\`
-              foo bar \${any} baz
-              \${any} 
-            \`"
-          ></div>
-        </template>
-        <style>
-          .foo {}
-        </style>
-      `,
-            },
-            {
-              output: `
-        <template>
-          <div
-            :class="\`
-              foo bar \${any} baz
-              \${any} foo
-            \`"
-          ></div>
-        </template>
-        <style>
-          .foo {}
-        </style>
-      `,
-            },
-          ],
-        },
-      ],
-    },
-    {
-      code: /* html */ `
-        <template>
-          <div class="bar baz"></div>
-        </template>
-        <style>
-          .foo {}
-        </style>
-      `,
-      options: [{ ignoreClassNames: ["bar"] }],
-      errors: [
-        {
-          messageId: "undefined",
-          data: { className: "baz" },
-          line: 3,
-          column: 27,
-          endLine: 3,
-          endColumn: 30,
-        },
-      ],
-    },
-    {
-      code: /* html */ `
-        <template>
-          <div class="foobar barbaz"></div>
-        </template>
-        <style>
-          .foo {}
-        </style>
-      `,
-      options: [{ ignoreClassNames: ["/^foo/"] }],
-      errors: [
-        {
-          messageId: "undefined",
-          data: { className: "barbaz" },
+          messageId: "undefined-element",
+          data: { className: "app--foobaz" },
           line: 3,
           column: 30,
           endLine: 3,
-          endColumn: 36,
+          endColumn: 43,
+          suggestions: [
+            {
+              output: html`
+                <template>
+                  <div bar="app--foobar" :baz=""></div>
+                  <div class="app--bam"></div>
+                </template>
+                <style>
+                  .app--foo {
+                  }
+                </style>
+              `,
+            },
+            {
+              output: html`
+                <template>
+                  <div bar="app--foobar" :baz="'app--foo'"></div>
+                  <div class="app--bam"></div>
+                </template>
+                <style>
+                  .app--foo {
+                  }
+                </style>
+              `,
+            },
+          ],
         },
       ],
     },
     {
+      name: "undefined classes in object",
+      filename: "app.vue",
       code: html`
         <template>
-          <div class="foobar barbaz"></div>
+          <div
+            :class="{'app--foo': true, bar: condition, baz, 'bam': condition}"
+          ></div>
         </template>
         <style>
-          .foo {
-          }
-          .baz {
+          .app--foo,
+          .app--foo.foo {
           }
         </style>
       `,
       errors: [
         {
-          messageId: "undefined",
+          messageId: "undefined-modifier",
+          data: { className: "bar" },
+          line: 4,
+          column: 28,
+          endLine: 4,
+          endColumn: 31,
+          suggestions: [
+            {
+              output: html`
+                <template>
+                  <div
+                    :class="{'app--foo': true, : condition, baz, 'bam': condition}"
+                  ></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.foo {
+                  }
+                </style>
+              `,
+            },
+            {
+              output: html`
+                <template>
+                  <div
+                    :class="{'app--foo': true, foo: condition, baz, 'bam': condition}"
+                  ></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.foo {
+                  }
+                </style>
+              `,
+            },
+          ],
+        },
+        {
+          messageId: "undefined-modifier",
+          data: { className: "baz" },
+          line: 4,
+          column: 44,
+          endLine: 4,
+          endColumn: 47,
+          suggestions: [
+            {
+              output: html`
+                <template>
+                  <div
+                    :class="{'app--foo': true, bar: condition, , 'bam': condition}"
+                  ></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.foo {
+                  }
+                </style>
+              `,
+            },
+            {
+              output: html`
+                <template>
+                  <div
+                    :class="{'app--foo': true, bar: condition, foo: baz, 'bam': condition}"
+                  ></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.foo {
+                  }
+                </style>
+              `,
+            },
+          ],
+        },
+        {
+          messageId: "undefined-modifier",
+          data: { className: "bam" },
+          line: 4,
+          column: 49,
+          endLine: 4,
+          endColumn: 54,
+          suggestions: [
+            {
+              output: html`
+                <template>
+                  <div
+                    :class="{'app--foo': true, bar: condition, baz, : condition}"
+                  ></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.foo {
+                  }
+                </style>
+              `,
+            },
+            {
+              output: html`
+                <template>
+                  <div
+                    :class="{'app--foo': true, bar: condition, baz, 'foo': condition}"
+                  ></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.foo {
+                  }
+                </style>
+              `,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "undefined in template literal",
+      filename: "app.vue",
+      options: [{ ignoreClassNames: ["__"] }],
+      code: html`
+        <template>
+          <div
+            :class="\`
+              app--foo bar \${any} baz __
+              \${any} foobar __
+            \`"
+          ></div>
+        </template>
+        <style>
+          .app--foo,
+          .app--foo.bam {
+          }
+        </style>
+      `,
+      errors: [
+        {
+          messageId: "undefined-modifier",
+          data: { className: "bar" },
+          line: 5,
+          column: 10,
+          endLine: 5,
+          endColumn: 13,
+          suggestions: [
+            {
+              output: html`
+                <template>
+                  <div
+                    :class="\`
+                      app--foo  \${any} baz __
+                      \${any} foobar __
+                    \`"
+                  ></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.bam {
+                  }
+                </style>
+              `,
+            },
+            {
+              output: html`
+                <template>
+                  <div
+                    :class="\`
+                      app--foo bam \${any} baz __
+                      \${any} foobar __
+                    \`"
+                  ></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.bam {
+                  }
+                </style>
+              `,
+            },
+          ],
+        },
+        {
+          messageId: "undefined-modifier",
+          data: { className: "baz" },
+          line: 5,
+          column: 21,
+          endLine: 5,
+          endColumn: 24,
+          suggestions: [
+            {
+              output: html`
+                <template>
+                  <div
+                    :class="\`
+                      app--foo bar \${any}  __
+                      \${any} foobar __
+                    \`"
+                  ></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.bam {
+                  }
+                </style>
+              `,
+            },
+            {
+              output: html`
+                <template>
+                  <div
+                    :class="\`
+                      app--foo bar \${any} bam __
+                      \${any} foobar __
+                    \`"
+                  ></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.bam {
+                  }
+                </style>
+              `,
+            },
+          ],
+        },
+        {
+          messageId: "undefined-modifier",
           data: { className: "foobar" },
+          line: 6,
+          column: 8,
+          endLine: 6,
+          endColumn: 14,
+          suggestions: [
+            {
+              output: html`
+                <template>
+                  <div
+                    :class="\`
+                      app--foo bar \${any} baz __
+                      \${any}  __
+                    \`"
+                  ></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.bam {
+                  }
+                </style>
+              `,
+            },
+            {
+              output: html`
+                <template>
+                  <div
+                    :class="\`
+                      app--foo bar \${any} baz __
+                      \${any} bam __
+                    \`"
+                  ></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.bam {
+                  }
+                </style>
+              `,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "undefined with option: ignoreClassNames as string or regexp",
+      filename: "app.vue",
+      options: [{ ignoreClassNames: ["bar", "/^foo/"] }],
+      code: html`
+        <template>
+          <div class="app--foo bar foobar barbaz"></div>
+        </template>
+        <style>
+          .app--foo,
+          .app--foo.baz {
+          }
+        </style>
+      `,
+      errors: [
+        {
+          messageId: "undefined-modifier",
+          data: { className: "barbaz" },
+          line: 3,
+          column: 33,
+          endLine: 3,
+          endColumn: 39,
+          suggestions: [
+            {
+              output: html`
+                <template>
+                  <div class="app--foo bar foobar "></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.baz {
+                  }
+                </style>
+              `,
+            },
+            {
+              output: html`
+                <template>
+                  <div class="app--foo bar foobar baz"></div>
+                </template>
+                <style>
+                  .app--foo,
+                  .app--foo.baz {
+                  }
+                </style>
+              `,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "correct order for suggestions",
+      filename: "app.vue",
+      code: html`
+        <template>
+          <div class="app--foobar"></div>
+          <div class="app--foo barbaz"></div>
+        </template>
+        <style>
+          .app--foo,
+          .app--foo.bar,
+          .app--foo.bam,
+          .app--baz {
+          }
+        </style>
+      `,
+      errors: [
+        {
+          messageId: "undefined-element",
+          data: { className: "app--foobar" },
           line: 3,
           column: 13,
           endLine: 3,
-          endColumn: 19,
+          endColumn: 24,
           suggestions: [
             {
               output: html`
                 <template>
-                  <div class=" barbaz"></div>
+                  <div class=""></div>
+                  <div class="app--foo barbaz"></div>
                 </template>
                 <style>
-                  .foo {
-                  }
-                  .baz {
+                  .app--foo,
+                  .app--foo.bar,
+                  .app--foo.bam,
+                  .app--baz {
                   }
                 </style>
               `,
@@ -575,12 +904,14 @@ tester.run("no-undefined-class-names", rule as any, {
             {
               output: html`
                 <template>
-                  <div class="foo barbaz"></div>
+                  <div class="app--foo"></div>
+                  <div class="app--foo barbaz"></div>
                 </template>
                 <style>
-                  .foo {
-                  }
-                  .baz {
+                  .app--foo,
+                  .app--foo.bar,
+                  .app--foo.bam,
+                  .app--baz {
                   }
                 </style>
               `,
@@ -588,12 +919,14 @@ tester.run("no-undefined-class-names", rule as any, {
             {
               output: html`
                 <template>
-                  <div class="baz barbaz"></div>
+                  <div class="app--baz"></div>
+                  <div class="app--foo barbaz"></div>
                 </template>
                 <style>
-                  .foo {
-                  }
-                  .baz {
+                  .app--foo,
+                  .app--foo.bar,
+                  .app--foo.bam,
+                  .app--baz {
                   }
                 </style>
               `,
@@ -601,22 +934,24 @@ tester.run("no-undefined-class-names", rule as any, {
           ],
         },
         {
-          messageId: "undefined",
+          messageId: "undefined-modifier",
           data: { className: "barbaz" },
-          line: 3,
-          column: 20,
-          endLine: 3,
-          endColumn: 26,
+          line: 4,
+          column: 22,
+          endLine: 4,
+          endColumn: 28,
           suggestions: [
             {
               output: html`
                 <template>
-                  <div class="foobar "></div>
+                  <div class="app--foobar"></div>
+                  <div class="app--foo "></div>
                 </template>
                 <style>
-                  .foo {
-                  }
-                  .baz {
+                  .app--foo,
+                  .app--foo.bar,
+                  .app--foo.bam,
+                  .app--baz {
                   }
                 </style>
               `,
@@ -624,12 +959,14 @@ tester.run("no-undefined-class-names", rule as any, {
             {
               output: html`
                 <template>
-                  <div class="foobar baz"></div>
+                  <div class="app--foobar"></div>
+                  <div class="app--foo bar"></div>
                 </template>
                 <style>
-                  .foo {
-                  }
-                  .baz {
+                  .app--foo,
+                  .app--foo.bar,
+                  .app--foo.bam,
+                  .app--baz {
                   }
                 </style>
               `,
@@ -637,12 +974,14 @@ tester.run("no-undefined-class-names", rule as any, {
             {
               output: html`
                 <template>
-                  <div class="foobar foo"></div>
+                  <div class="app--foobar"></div>
+                  <div class="app--foo bam"></div>
                 </template>
                 <style>
-                  .foo {
-                  }
-                  .baz {
+                  .app--foo,
+                  .app--foo.bar,
+                  .app--foo.bam,
+                  .app--baz {
                   }
                 </style>
               `,
