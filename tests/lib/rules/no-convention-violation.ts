@@ -90,6 +90,7 @@ tester.run("no-convention-violation", rule as any, {
     },
     {
       filename: "FooComponent.vue",
+      options: [{ allowTopLevelNonClassSelector: true }],
       code: /* html */ `
         <style>
           :hover {}
@@ -100,7 +101,6 @@ tester.run("no-convention-violation", rule as any, {
           #foo {}
         </style>
       `,
-      options: [{ allowTopLevelNonClassSelector: true }],
     },
     {
       filename: "FooComponent.vue",
