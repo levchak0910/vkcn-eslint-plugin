@@ -172,7 +172,7 @@ function getAllClassesFromTag(
   tag.attributes.forEach((attr) => {
     if (
       attr.key.type === "VIdentifier" &&
-      classAttrName === attr.key.name &&
+      attr.key.name === classAttrName &&
       attr.value?.type === "VLiteral"
     ) {
       const classes = getClassesFromClassString(attr.value.value);
@@ -182,7 +182,8 @@ function getAllClassesFromTag(
     if (
       attr.key.type === "VDirectiveKey" &&
       attr.key.argument?.type === "VIdentifier" &&
-      classAttrName === attr.key.argument.name &&
+      attr.key.name.name === "bind" &&
+      attr.key.argument.name === classAttrName &&
       attr.value?.type === "VExpressionContainer"
     ) {
       const classes = getAllClassesFromExpression(
@@ -212,8 +213,10 @@ export = {
     fixable: null,
     messages: {
       "undefined-element": "The element class name is undefined.",
-      "excess-element": "The element class name is undefined.",
-      "undefined-modifier": "The class name `{{className}}` is undefined.",
+      "excess-element":
+        "The element class name can not be defined twice ot more.",
+      "undefined-modifier":
+        "The modifier class name `{{className}}` is undefined.",
       useDefined: "Use '{{className}}' instead.",
       removeUndefined: "Remove class name '{{className}}' from template.",
     },
@@ -264,7 +267,7 @@ export = {
     }: {
       className: string;
       classType: "element" | "modifier";
-      elementClass?: string;
+      elementClass: string;
       kind: "plain" | "quotable" | "quoted";
       transform?: (adaptedClassName: string, oldClassName?: string) => string;
       location?: SourceLocation;
@@ -291,9 +294,7 @@ export = {
 
       const allAvailableClasses = className.includes("--")
         ? Array.from(vkcnClassSelectors.keys())
-        : Array.from(
-            vkcnClassSelectors.get(elementClass ?? className)?.values() ?? [],
-          );
+        : Array.from(vkcnClassSelectors.get(elementClass)?.values() ?? []);
 
       reporter.report({
         loc: { start, end },
