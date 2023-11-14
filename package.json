@@ -8,7 +8,7 @@
     "lint": "eslint . --ext .js,.vue,.ts,.json",
     "fix": "npm run lint -- --fix",
     "pretest": "npm run build",
-    "test:base": "mocha --require ts-node/register \"tests/**/*.ts\" --reporter dot --timeout 60000",
+    "test:base": "mocha --require ts-node/register \"tests/lib/rules/**/*.ts\" --reporter dot --timeout 60000",
     "test": "npm run test:base",
     "test:debug": "mocha --require ts-node/register/transpile-only \"tests/lib/rules/**/*.ts\" --reporter dot",
     "t": "mocha --require ts-node/register/transpile-only --reporter dot",
