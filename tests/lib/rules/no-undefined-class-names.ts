@@ -142,16 +142,14 @@ tester.run("no-undefined-class-names", rule as any, {
       `,
       errors: [
         {
-          messageId: "undefined-element",
-          data: { className: "foo" },
+          messageId: "invalid-element",
           line: 3,
           column: 6,
           endLine: 3,
           endColumn: 17,
         },
         {
-          messageId: "undefined-element",
-          data: { className: "bar" },
+          messageId: "invalid-element",
           line: 4,
           column: 6,
           endLine: 4,
@@ -306,7 +304,7 @@ tester.run("no-undefined-class-names", rule as any, {
         },
         {
           messageId: "undefined-element",
-          data: { className: "app--bar" },
+          data: { className: "app--baz" },
           line: 4,
           column: 15,
           endLine: 4,

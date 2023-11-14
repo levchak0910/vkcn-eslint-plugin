@@ -212,9 +212,11 @@ export = {
     },
     fixable: null,
     messages: {
-      "undefined-element": "The element class name is undefined.",
+      "invalid-element": "The attribute doesn't have valid element class name.",
+      "undefined-element":
+        "The element class name `{{className}}` is undefined.",
       "excess-element":
-        "The element class name can not be defined twice ot more.",
+        "The element class name can not be defined twice or more.",
       "undefined-modifier":
         "The modifier class name `{{className}}` is undefined.",
       useDefined: "Use '{{className}}' instead.",
@@ -412,7 +414,7 @@ export = {
         reporter.report({
           node: attr,
           messageId:
-            attrClasses.valid === 0 ? "undefined-element" : "excess-element",
+            attrClasses.valid === 0 ? "invalid-element" : "excess-element",
         });
         return true;
       }
