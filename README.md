@@ -1,8 +1,10 @@
-# eslint-plugin-vue-kebab-class-naming
+# eslint-plugin-vue-kebab-class-naming (VKCN)
 
 [eslint-plugin-vue-kebab-class-naming](https://www.npmjs.com/package/eslint-plugin-vue-kebab-class-naming) is an ESLint plugin for ensuring a kebab-ish like class naming convention.
 
 This convention was invited and relates only to this plugin. The convention was created to solve styles encapsulation via class naming. The description of the convention can be found in [rule documentation](./docs/rules/no-convention-violation.md).
+
+Read more about CSS encapsulation and compare VKCN with other options in this [article](https://dev.to/levchak0910/new-old-way-to-write-css-1hml).
 
 ## Features
 
