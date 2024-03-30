@@ -11,6 +11,7 @@ import type {
 
 import * as utils from "../utils/vue";
 import { getClassAttrNameRegexp } from "../utils/class-attr";
+import { getSourceCode } from "../utils/compat";
 import type { RuleContext, RuleListener } from "../types";
 
 function withProps(
@@ -26,11 +27,15 @@ function withProps(
   }
 
   return utils.compositingVisitors(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- prevent test failing
+    // @ts-ignore -- eslint compat types diff, fix after upgrading to eslint v9
     utils.defineScriptSetupVisitor(context, {
       onDefinePropsEnter(_, props) {
         propNames.push(...props.map((p) => p.propName).filter(isString));
       },
     }) as RuleListener,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- prevent test failing
+    // @ts-ignore -- eslint compat types diff, fix after upgrading to eslint v9
     utils.defineVueVisitor(context, {
       onVueObjectEnter(node) {
         const props = utils.getComponentPropsFromOptions(node);
@@ -69,7 +74,9 @@ export = {
     type: "problem",
   },
   create(context: RuleContext): RuleListener {
-    if (!context.parserServices.defineTemplateBodyVisitor) return {};
+    const sourceCode = getSourceCode(context);
+
+    if (!sourceCode.parserServices.defineTemplateBodyVisitor) return {};
 
     const classAttrRegexp = getClassAttrNameRegexp(context);
     const allowConditional = context.options[0]?.allowConditional || false;
@@ -227,7 +234,7 @@ export = {
     }
 
     return withProps(context, (props) =>
-      context.parserServices.defineTemplateBodyVisitor({
+      sourceCode.parserServices.defineTemplateBodyVisitor({
         [`VAttribute[key.name=${classAttrRegexp}]`](node: VAttribute) {
           reportDynamic(node, props);
         },

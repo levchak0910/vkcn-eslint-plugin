@@ -149,10 +149,11 @@ module.exports = {
       },
     },
     {
-      files: ["lib/utils/ts-utils/*.js"],
+      files: ["lib/utils/**/*.js"],
       rules: {
         "no-shadow": "off",
         "default-case": "off",
+        "no-restricted-properties": "off",
       },
     },
   ],

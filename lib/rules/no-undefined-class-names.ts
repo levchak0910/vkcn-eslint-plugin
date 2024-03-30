@@ -27,6 +27,7 @@ import {
   isSatisfyList,
 } from "../utils/utils";
 import { getClassAttrNameRegexp, getAttrName } from "../utils/class-attr";
+import { getSourceCode } from "../utils/compat";
 
 function getAllSelectorsFromStyles(
   styles: ValidStyleContext[],
@@ -98,7 +99,7 @@ function getClassPosition(
   let startColumn = -1;
 
   if (isMultiline) {
-    const classLineIndex = lines.findIndex((l) => l.includes(className))!;
+    const classLineIndex = lines.findIndex((l) => l.includes(className));
     const classLine = lines[classLineIndex];
 
     line = classLineIndex;
@@ -244,7 +245,7 @@ export = {
       return {};
     }
     const styles = getStyleContexts(context).filter(isValidStyleContext);
-    const source = context.getSourceCode();
+    const sourceCode = getSourceCode(context);
     const reporter = getCommentDirectivesReporter(context);
 
     const classAttrRegexp = getClassAttrNameRegexp(context);
@@ -291,8 +292,8 @@ export = {
             column: endCol!,
           };
 
-      const startIndex = source.getIndexFromLoc(start);
-      const endIndex = source.getIndexFromLoc(end);
+      const startIndex = sourceCode.getIndexFromLoc(start);
+      const endIndex = sourceCode.getIndexFromLoc(end);
 
       const allAvailableClasses = className.includes("--")
         ? Array.from(vkcnClassSelectors.keys())
@@ -422,7 +423,7 @@ export = {
       return false;
     }
 
-    return context.parserServices.defineTemplateBodyVisitor({
+    return sourceCode.parserServices.defineTemplateBodyVisitor({
       [`VAttribute[key.name=${classAttrRegexpAsString}]`](attr: VAttribute) {
         const classListString = attr.value?.value;
         if (classListString === undefined) return;
