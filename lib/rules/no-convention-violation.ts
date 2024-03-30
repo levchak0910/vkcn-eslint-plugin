@@ -21,6 +21,7 @@ import type {
 } from "../types";
 import { getResolvedSelectors } from "../styles/selectors";
 import { isDefined } from "../utils/utils";
+import { getFilename } from "../utils/compat";
 import type { ValidStyleContext } from "../styles/context";
 
 export = {
@@ -341,7 +342,7 @@ export = {
     }
 
     function getPrefix(style: ValidStyleContext): string {
-      const fileName = context.getFilename();
+      const fileName = getFilename(context);
       const { dir, name } = path.parse(fileName);
 
       const defaultComponentName =

@@ -19,7 +19,7 @@ export type Rule = {
   meta: {
     docs: {
       description: string;
-      categories: ("recommended" | "vue3-recommended")[];
+      categories: ("vue2-recommended" | "vue3-recommended")[];
       ruleId?: string;
       ruleName?: string;
       default?: string;
@@ -176,6 +176,7 @@ export interface SourceCode {
   hasBOM: boolean;
   visitorKeys: any;
   scopeManager: ScopeManager;
+  parserServices: ParserServices;
   getAllComments: () => AST.Token[];
 
   getText(node?: AST.Node, beforeCount?: number, afterCount?: number): string;

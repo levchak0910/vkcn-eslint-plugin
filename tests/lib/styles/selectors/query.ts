@@ -22,6 +22,7 @@ import {
   isVDirective,
   isVDirectiveKeyV6,
 } from "../../../../lib/utils/templates";
+import { getSourceCode } from "../../../../lib/utils/compat";
 
 const ROOT = path.join(__dirname, "../fixtures/selectors/query");
 
@@ -149,7 +150,7 @@ function getAttrText(
           value:
             (value &&
               value.expression &&
-              context.getSourceCode().getText(value.expression)) ||
+              getSourceCode(context).getText(value.expression)) ||
             "",
         };
       }
@@ -165,7 +166,7 @@ function getAttrText(
         value:
           (value &&
             value.expression &&
-            context.getSourceCode().getText(value.expression)) ||
+            getSourceCode(context).getText(value.expression)) ||
           "",
       };
     }

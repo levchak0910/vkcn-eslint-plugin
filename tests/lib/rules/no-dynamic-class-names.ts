@@ -1,9 +1,12 @@
-import { RuleTester } from "eslint";
+import * as vueParser from "vue-eslint-parser";
+
+import { RuleTester } from "../test-lib/eslint-compat";
+
 import rule from "../../../lib/rules/no-dynamic-class-names";
 
 const tester = new RuleTester({
-  parser: require.resolve("vue-eslint-parser"),
-  parserOptions: {
+  languageOptions: {
+    parser: vueParser,
     ecmaVersion: 2019,
     sourceType: "module",
   },
