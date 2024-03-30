@@ -76,11 +76,7 @@
     "postcss-selector-parser": "^6.0.16",
     "postcss-styl": "^0.12.3"
   },
-  "peerDependencies": {
-    "eslint": ">=5.0.0",
-    "vue-eslint-parser": ">=7.1.0"
-  },
   "engines": {
-    "node": ">=16"
+    "node": ">=18.0.0"
   }
 }
