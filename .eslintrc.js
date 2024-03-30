@@ -148,5 +148,12 @@ module.exports = {
         "no-console": "off",
       },
     },
+    {
+      files: ["lib/utils/ts-utils/*.js"],
+      rules: {
+        "no-shadow": "off",
+        "default-case": "off",
+      },
+    },
   ],
 };
