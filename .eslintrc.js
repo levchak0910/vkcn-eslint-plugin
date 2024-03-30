@@ -108,7 +108,7 @@ module.exports = {
           "warn",
           {
             pattern:
-              "https://github.com/levchak0910/eslint-plugin-vue-kebab-class-naming/blob/main/docs/rules/{{name}}.md",
+              "https://github.com/levchak0910/eslint-plugin-vkcn/blob/main/docs/rules/{{name}}.md",
           },
         ],
         "eslint-plugin/require-meta-has-suggestions": "off", // false positive

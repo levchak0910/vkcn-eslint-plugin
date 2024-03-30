@@ -4,17 +4,17 @@ const baseRules = [
   {
     rule: require("../rules/no-dynamic-class-names"),
     ruleName: "no-dynamic-class-names",
-    ruleId: "vue-kebab-class-naming/no-dynamic-class-names",
+    ruleId: "@vkcn/no-dynamic-class-names",
   },
   {
     rule: require("../rules/no-undefined-class-names"),
     ruleName: "no-undefined-class-names",
-    ruleId: "vue-kebab-class-naming/no-undefined-class-names",
+    ruleId: "@vkcn/no-undefined-class-names",
   },
   {
     rule: require("../rules/no-convention-violation"),
     ruleName: "no-convention-violation",
-    ruleId: "vue-kebab-class-naming/no-convention-violation",
+    ruleId: "@vkcn/no-convention-violation",
   },
 ];
 

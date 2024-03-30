@@ -11,7 +11,7 @@ function readRules() {
   const rules = [];
   for (const name of result) {
     const ruleName = name.replace(/\.ts$/u, "");
-    const ruleId = `vue-kebab-class-naming/${ruleName}`;
+    const ruleId = `@vkcn/${ruleName}`;
     const rule = require(path.join(rulesLibRoot, name));
 
     rule.meta.docs.ruleName = ruleName;

@@ -1,4 +1,4 @@
-# vue-kebab-class-naming/no-convention-violation
+# @vkcn/no-convention-violation
 
 > enforce css/scss code style
 
@@ -154,7 +154,7 @@ Nesting can be used only
 
 ```json
 {
-  "vue-kebab-class-naming/no-convention-violation": ["error", {
+  "@vkcn/no-convention-violation": ["error", {
    "allowTopLevelNonClassSelector": false,
    "enableFix": false,
   }]

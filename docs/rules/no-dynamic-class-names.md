@@ -1,4 +1,4 @@
-# vue-kebab-class-naming/no-dynamic-class-names
+# @vkcn/no-dynamic-class-names
 
 > disallow dynamic class names usage
 
@@ -49,7 +49,7 @@ const someClass = "class-name"
 
 ```json
 {
-  "vue-kebab-class-naming/no-dynamic-class-names": ["error", {
+  "@vkcn/no-dynamic-class-names": ["error", {
     "allowConditional": false,
     "allowProps": false,
   }]

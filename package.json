@@ -1,5 +1,5 @@
 {
-  "name": "eslint-plugin-vue-kebab-class-naming",
+  "name": "@vkcn/eslint-plugin",
   "version": "0.4.0",
   "description": "ESLint plugin for ensuring a kebab-ish like class naming convention in Vue files",
   "main": "dist/index.js",
@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/levchak0910/eslint-plugin-vue-kebab-class-naming.git"
+    "url": "git+https://github.com/levchak0910/eslint-plugin-vkcn.git"
   },
   "author": "Levcsák Sándor",
   "license": "MIT",

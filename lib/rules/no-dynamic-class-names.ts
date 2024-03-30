@@ -51,7 +51,7 @@ export = {
     docs: {
       description: "disallow dynamic class names usage",
       default: "error",
-      url: "https://github.com/levchak0910/eslint-plugin-vue-kebab-class-naming/blob/main/docs/rules/no-dynamic-class-names.md",
+      url: "https://github.com/levchak0910/eslint-plugin-vkcn/blob/main/docs/rules/no-dynamic-class-names.md",
     },
     fixable: null,
     messages: {

@@ -7,7 +7,7 @@ describe("Don't crash even if without vue-eslint-parser.", () => {
   const code = "<style scoped>.a {}</style>";
 
   for (const key of Object.keys(plugin.rules)) {
-    const ruleId = `vue-kebab-class-naming/${key}`;
+    const ruleId = `@vkcn/${key}`;
 
     it(ruleId, () => {
       const linter = new Linter();

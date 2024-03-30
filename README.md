@@ -1,8 +1,10 @@
-# eslint-plugin-vue-kebab-class-naming (VKCN)
+# @vkcn/eslint-plugin
 
-[eslint-plugin-vue-kebab-class-naming](https://www.npmjs.com/package/eslint-plugin-vue-kebab-class-naming) is an ESLint plugin for ensuring a kebab-ish like class naming convention.
+[@vkcn/eslint-plugin](https://www.npmjs.com/package/@vkcn/eslint-plugin) is an ESLint plugin for ensuring a kebab-ish like class naming convention.
 
 This convention was invited and relates only to this plugin. The convention was created to solve styles encapsulation via class naming. The description of the convention can be found in [rule documentation](./docs/rules/no-convention-violation.md).
+
+`VKCN` stands for vue-kebab-class-naming.
 
 Read more about CSS encapsulation and compare VKCN with other options in this [article](https://dev.to/levchak0910/new-old-way-to-write-css-1hml).
 
@@ -20,9 +22,15 @@ This ESLint plugin provides linting rules related to better class names usage.
 Prerequisite: [eslint](https://eslint.org/) and [eslint-plugin-vue](https://eslint.vuejs.org/) are already installed
 
 ```bash
-npm install --save-dev eslint-plugin-vue-kebab-class-naming
-# or
-yarn add --dev eslint-plugin-vue-kebab-class-naming
+npm install --save-dev @vkcn/eslint-plugin
+```
+
+```bash
+yarn add --dev @vkcn/eslint-plugin
+```
+
+```bash
+pnpm add --dev @vkcn/eslint-plugin
 ```
 
 ## Usage
@@ -33,10 +41,10 @@ Example **.eslintrc.js**:
 
 ```js
 module.exports = {
-  plugins: ['vue-kebab-class-naming'],
+  plugins: ['@vkcn'],
   settings: { "vkcn/class-attr-name": /custom-reg-exp/ }, // optional
   rules: {
-    'vue-kebab-class-naming/<rule-name>': 'error'
+    '@vkcn/<rule-name>': 'error'
   }
 }
 ```
@@ -57,7 +65,7 @@ module.exports = {
   plugins: [
     'vue',
     'vue-scoped-css',
-    'vue-kebab-class-naming',
+    '@vkcn',
   ],
   rules: {
     "vue/no-useless-v-bind": "error",
@@ -67,9 +75,9 @@ module.exports = {
     "vue-scoped-css/no-unused-selector": ["error", { checkUnscoped: true }],
     "vue-scoped-css/require-selector-used-inside": ["error", { checkUnscoped: true }],
 
-    'vue-kebab-class-naming/no-convention-violation': ["error", { enableFix: true }],
-    'vue-kebab-class-naming/no-dynamic-class-names': "error",
-    'vue-kebab-class-naming/no-undefined-class-names': "error",
+    '@vkcn/no-convention-violation': ["error", { enableFix: true }],
+    '@vkcn/no-dynamic-class-names': "error",
+    '@vkcn/no-undefined-class-names': "error",
   }
 }
 ```
@@ -88,9 +96,9 @@ Rules which have suggestions - marked with :bulb:
 
 | Rule ID | Description |    |
 |:--------|:------------|:---|
-| [vue-kebab-class-naming/no-dynamic-class-names](./docs/rules/no-dynamic-class-names.md) | disallow dynamic class names usage | |
-| [vue-kebab-class-naming/no-undefined-class-names](./docs/rules/no-undefined-class-names.md) | disallow class names using in `<template>` that are not defined in `<style>` | :bulb: |
-| [vue-kebab-class-naming/no-convention-violation](./docs/rules/no-convention-violation.md) | enforce css/scss code style | :wrench: :bulb: |
+| [@vkcn/no-dynamic-class-names](./docs/rules/no-dynamic-class-names.md) | disallow dynamic class names usage | |
+| [@vkcn/no-undefined-class-names](./docs/rules/no-undefined-class-names.md) | disallow class names using in `<template>` that are not defined in `<style>` | :bulb: |
+| [@vkcn/no-convention-violation](./docs/rules/no-convention-violation.md) | enforce css/scss code style | :wrench: :bulb: |
 
 ## Contributing
 

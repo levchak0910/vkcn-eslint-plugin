@@ -1,4 +1,4 @@
-# vue-kebab-class-naming/no-undefined-class-names
+# @vkcn/no-undefined-class-names
 
 > disallow class names using in `<template>` that are not defined in `<style>`
 
@@ -30,7 +30,7 @@ _Tip_: when class is defined in `<style>` but mistyped in `<template>` - use esl
 
 ```json
 {
-  "vue-kebab-class-naming/no-undefined-class-names": ["error", {
+  "@vkcn/no-undefined-class-names": ["error", {
     "ignoreClassNames": [],
   }]
 }

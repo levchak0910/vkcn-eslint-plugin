@@ -123,7 +123,7 @@ tester.run("${ruleId}", rule as any, {
   );
   fs.writeFileSync(
     docFile,
-    `# vue-kebab-class-naming/${ruleId}
+    `# @vkcn/${ruleId}
 
 > <short description>
 
@@ -135,7 +135,7 @@ tester.run("${ruleId}", rule as any, {
 
 \`\`\`json
 {
-  "vue-kebab-class-naming/${ruleId}": ["error", {
+  "@vkcn/${ruleId}": ["error", {
    
   }]
 }
