@@ -13,6 +13,7 @@ module.exports = {
     "plugin:@ota-meshi/+json",
     "plugin:@ota-meshi/+yaml",
     "plugin:@ota-meshi/+prettier",
+    "plugin:node-dependencies/recommended",
   ],
   rules: {
     "require-jsdoc": "off",
@@ -35,10 +36,59 @@ module.exports = {
       "error",
       ["name", "filename", "settings", "options", "code"],
     ],
+    // Repo rule
+    "@typescript-eslint/no-restricted-imports": [
+      "error",
+      {
+        patterns: [
+          {
+            group: ["/regexpp", "/regexpp/*"],
+            message: "Please use `@eslint-community/regexpp` instead.",
+          },
+          {
+            group: ["/eslint-utils", "/eslint-utils/*"],
+            message: "Please use `@eslint-community/eslint-utils` instead.",
+          },
+        ],
+      },
+    ],
+    "no-restricted-properties": [
+      "error",
+      {
+        object: "context",
+        property: "getSourceCode",
+        message: "Use src/utils/compat.ts",
+      },
+      {
+        object: "context",
+        property: "getFilename",
+        message: "Use src/utils/compat.ts",
+      },
+      {
+        object: "context",
+        property: "getPhysicalFilename",
+        message: "Use src/utils/compat.ts",
+      },
+      {
+        object: "context",
+        property: "getCwd",
+        message: "Use src/utils/compat.ts",
+      },
+      {
+        object: "context",
+        property: "getScope",
+        message: "Use src/utils/compat.ts",
+      },
+      {
+        object: "context",
+        property: "parserServices",
+        message: "Use src/utils/compat.ts",
+      },
+    ],
   },
   overrides: [
     {
-      files: ["*.ts"],
+      files: ["*.ts", "*.mts"],
       parser: "@typescript-eslint/parser",
       rules: {
         "@typescript-eslint/no-require-imports": "off",

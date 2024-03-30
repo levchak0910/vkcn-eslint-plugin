@@ -1,12 +1,13 @@
 import type { ESLintNode, VNode } from "vue-eslint-parser/ast";
 import type { RuleContext } from "../types";
 import { isRegExp, toRegExp } from "./regexp";
+import { getSourceCode } from "./compat";
 
 /**
  * Checks whether the given context has template block
  */
 export function hasTemplateBlock(context: RuleContext): boolean {
-  const sourceCode = context.getSourceCode();
+  const sourceCode = getSourceCode(context);
   const { ast } = sourceCode;
   return Boolean(ast.templateBody);
 }
