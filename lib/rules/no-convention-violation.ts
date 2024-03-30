@@ -29,7 +29,7 @@ export = {
     docs: {
       description: "enforce convention",
       default: "error",
-      url: "https://github.com/levchak0910/eslint-plugin-vkcn/blob/main/docs/rules/no-convention-violation.md",
+      url: "https://github.com/levchak0910/vkcn-eslint-plugin/blob/main/docs/rules/no-convention-violation.md",
     },
     fixable: "code",
     messages: {

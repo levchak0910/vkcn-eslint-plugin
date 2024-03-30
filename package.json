@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/levchak0910/eslint-plugin-vkcn.git"
+    "url": "git+https://github.com/levchak0910/vkcn-eslint-plugin.git"
   },
   "author": "Levcsák Sándor",
   "license": "MIT",
@@ -30,6 +30,7 @@
     "vue",
     "classes",
     "class-naming",
+    "vkcn",
     "kebab-case"
   ],
   "files": [
