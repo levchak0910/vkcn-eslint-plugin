@@ -108,7 +108,7 @@ export = {
     const enableFix = context.options[0]?.enableFix ?? false;
 
     const DIVIDER = "--";
-    const COMMENT = "vkcn-prefix";
+    const COMMENT = "@vkcn/prefix";
 
     function reportTopLevelClassSelector(
       selector: VCSSClassSelector,

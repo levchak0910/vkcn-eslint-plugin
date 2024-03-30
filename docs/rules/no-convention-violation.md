@@ -27,7 +27,7 @@ Name should follow pattern `<prefix>--<element>`, where
   - by default
     1. equals to file name
     2. if file called as `index` then equals to containing folder name
-  - can be overwritten with `vkcn-prefix` comment
+  - can be overwritten with `@vkcn/prefix` comment
 - element - any custom name which is appropriate for DOM element
 
 Element selector can not contain other element selector
@@ -38,7 +38,7 @@ Should be declared on `class` attribute (`class="<prefix>--<element>"`), not bin
 
 Prefix overwrite all element class selectors per file
 
-Should be declared by pattern `vkcn-prefix <any-appropriate-name>`. Recommended to place at the begging of the style tag
+Should be declared by pattern `@vkcn/prefix <any-appropriate-name>`. Recommended to place at the begging of the style tag
 
 non kebab case prefix will be _ignored_ and fallback to default naming
 
@@ -64,14 +64,14 @@ non kebab case prefix will be _ignored_ and fallback to default naming
 
 ```html
 <style>
-/* vkcn-prefix some-better-name */
+/* @vkcn/prefix some-better-name */
 .some-better-name--some-element {}
 </style>
 ```
 
 ```html
 <style lang="scss">
-// vkcn-prefix some-better-name
+// @vkcn/prefix some-better-name
 .some-better-name--some-element {}
 </style>
 ```

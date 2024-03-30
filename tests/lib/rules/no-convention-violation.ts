@@ -20,20 +20,20 @@ tester.run("no-convention-violation", rule as any, {
       filename: "FooComponent.vue",
       code: /* html */ `
         <style>
-          /* vkcn-prefix foo-baz */
+          /* @vkcn/prefix foo-baz */
           .foo-baz--bar {}
         </style>
         <style>
-          /* vkcn-prefix foo--baz */
+          /* @vkcn/prefix foo--baz */
           .foo-component--bar {}
         </style>
       
         <style lang="scss">
-          // vkcn-prefix foo-baz
+          // @vkcn/prefix foo-baz
           .foo-baz--bam {}
         </style>
         <style lang="scss">
-          // vkcn-prefix foo--baz
+          // @vkcn/prefix foo--baz
           .foo-component--bam {}
         </style>
       `,
