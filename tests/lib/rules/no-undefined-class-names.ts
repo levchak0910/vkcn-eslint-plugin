@@ -66,7 +66,7 @@ tester.run("no-undefined-class-names", rule as any, {
     {
       name: "custom attribute names",
       filename: "app.vue",
-      settings: { "vkcn/class-attr-name": /^(bar|baz)$/ },
+      settings: { "@vkcn/class-attr-name": /^(bar|baz)$/ },
       code: html`
         <template>
           <div bar="app--foo" :baz="'app--foo'"></div>
@@ -443,7 +443,7 @@ tester.run("no-undefined-class-names", rule as any, {
     {
       name: "undefined with custom attribute names",
       filename: "app.vue",
-      settings: { "vkcn/class-attr-name": /^(bar|baz)$/ },
+      settings: { "@vkcn/class-attr-name": /^(bar|baz)$/ },
       code: html`
         <template>
           <div bar="app--foobar" :baz="'app--foobaz'"></div>

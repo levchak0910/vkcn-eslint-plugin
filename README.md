@@ -42,14 +42,14 @@ Example **.eslintrc.js**:
 ```js
 module.exports = {
   plugins: ['@vkcn'],
-  settings: { "vkcn/class-attr-name": /custom-reg-exp/ }, // optional
+  settings: { "@vkcn/class-attr-name": /custom-reg-exp/ }, // optional
   rules: {
     '@vkcn/<rule-name>': 'error'
   }
 }
 ```
 
-By using `settings: { "vkcn/class-attr-name": /custom-reg-exp/ }` it is possible to run rules throughout any attribute/directive which matches regexp. By default only `class` is checked.
+By using `settings: { "@vkcn/class-attr-name": /custom-reg-exp/ }` it is possible to run rules throughout any attribute/directive which matches regexp. By default only `class` is checked.
 
 _Please note!_ When using a custom regexp - `class` **must be included** into it
 

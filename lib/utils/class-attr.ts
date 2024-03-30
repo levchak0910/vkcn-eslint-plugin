@@ -2,7 +2,7 @@ import type { RuleContext } from "../types";
 import type { VAttribute, VDirective } from "vue-eslint-parser/ast";
 
 export function getClassAttrNameRegexp(context: RuleContext): RegExp {
-  const customClassAttrName = context.settings?.["vkcn/class-attr-name"];
+  const customClassAttrName = context.settings?.["@vkcn/class-attr-name"];
 
   const customClassAttrNameRegexp =
     customClassAttrName instanceof RegExp ? customClassAttrName : /^class$/;

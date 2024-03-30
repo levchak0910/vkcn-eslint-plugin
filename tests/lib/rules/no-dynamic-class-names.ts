@@ -10,7 +10,7 @@ const tester = new RuleTester({
     ecmaVersion: 2019,
     sourceType: "module",
   },
-  settings: { "vkcn/class-attr-name": /(.+-)?class$/ },
+  settings: { "@vkcn/class-attr-name": /(.+-)?class$/ },
 });
 
 type RuleOptions = {
