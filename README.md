@@ -84,7 +84,7 @@ module.exports = {
 
 #### Additional tools
 
-- [vkcn-report-duplicated-class-selectors](https://www.npmjs.com/package/vkcn-report-duplicated-class-selectors) - reports duplicate classes in multiple files
+- [@vkcn/reporter](https://www.npmjs.com/package/@vkcn/reporter) - reports duplicate classes in multiple files
 
 Since Eslint works only with one file and can not lint the whole project - something else is needed for checking. This tool is intended to be used to ensure that no identical classes are defined in multiple files (to prevent style leaks)
 
