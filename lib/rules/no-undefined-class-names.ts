@@ -47,6 +47,9 @@ function getVKCNClasses(
 
   selectorGroups.forEach((selectorGroup) => {
     const classSelectors = selectorGroup.filter(isClassSelector);
+
+    if (classSelectors.length === 0) return;
+
     const elementSelector = classSelectors[0].value;
 
     if (!map.has(elementSelector)) {
