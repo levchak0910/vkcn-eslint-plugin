@@ -30,7 +30,7 @@ yarn add --dev @vkcn/eslint-plugin
 ```
 
 ```bash
-pnpm add --dev @vkcn/eslint-plugin
+pnpm add -D @vkcn/eslint-plugin
 ```
 
 ## Usage
